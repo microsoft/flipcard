@@ -45,7 +45,7 @@ jobs:
           mkdir -p _site/showcase
           cp -r apps/showcase/dist/* _site/showcase/
           node --input-type=module -e 'import { mkdirSync, writeFileSync } from "node:fs"; import { flipCardManifestSchema } from "./packages/core/dist/schema.js"; mkdirSync("_site/schema", { recursive: true }); writeFileSync("_site/schema/v0.1.json", JSON.stringify(flipCardManifestSchema, null, 2) + "\n");'
-      - uses: actions/configure-pages@v5
+      - uses: actions/configure-pages@v6
         with:
           enablement: true
       - uses: actions/upload-pages-artifact@v3
