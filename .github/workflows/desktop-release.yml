@@ -70,7 +70,7 @@ jobs:
           Get-ChildItem artifacts | Format-Table Name,Length
 
       - name: Upload bundle artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: flipcard-desktop-windows
           path: artifacts/*
