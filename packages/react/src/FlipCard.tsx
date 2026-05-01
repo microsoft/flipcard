@@ -35,6 +35,52 @@ function toneClassName(tone: FlipCardAssetTone = 'neutral'): string {
   return `fc-tone-pill fc-tone-${tone}`;
 }
 
+function lightenHex(hex: string, amount: number): string {
+  const h = hex.replace('#', '');
+  if (h.length !== 6) return hex;
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  const lr = Math.min(255, Math.round(r + (255 - r) * amount));
+  const lg = Math.min(255, Math.round(g + (255 - g) * amount));
+  const lb = Math.min(255, Math.round(b + (255 - b) * amount));
+  return `#${lr.toString(16).padStart(2, '0')}${lg.toString(16).padStart(2, '0')}${lb.toString(16).padStart(2, '0')}`;
+}
+
+function buildSlideHostConfig(theme: Record<string, unknown> | undefined): Record<string, unknown> | null {
+  if (!theme) return null;
+  const bg = (theme.backgroundColor as string) || '#0f1729';
+  const accent = (theme.accentColor as string) || '#6366f1';
+  const emphasisBg = lightenHex(bg, 0.12);
+
+  const baseFg = {
+    default:   { default: '#ffffff', subtle: '#ffffffbb' },
+    dark:      { default: '#ffffff', subtle: '#ffffffbb' },
+    light:     { default: '#ffffff', subtle: '#ffffffee' },
+    accent:    { default: accent,    subtle: accent },
+    good:      { default: '#4ade80', subtle: '#4ade80cc' },
+    warning:   { default: '#fbbf24', subtle: '#fbbf24cc' },
+    attention: { default: '#f87171', subtle: '#f87171cc' },
+  };
+  const whiteFg = {
+    default:   { default: '#ffffff', subtle: '#ffffffdd' },
+    dark:      { default: '#ffffff', subtle: '#ffffffdd' },
+    light:     { default: '#ffffff', subtle: '#ffffffee' },
+  };
+
+  return {
+    supportsInteractivity: false,
+    containerStyles: {
+      default:   { backgroundColor: bg,        foregroundColors: baseFg },
+      emphasis:  { backgroundColor: emphasisBg, foregroundColors: baseFg },
+      accent:    { backgroundColor: accent,     foregroundColors: whiteFg },
+      good:      { backgroundColor: '#16a34a',  foregroundColors: whiteFg },
+      attention: { backgroundColor: '#dc2626',  foregroundColors: whiteFg },
+      warning:   { backgroundColor: '#d97706',  foregroundColors: whiteFg },
+    },
+  };
+}
+
 const defaultChartPalette = {
   solid: '#0284c7',
   soft: 'rgba(2, 132, 199, 0.14)',
@@ -703,6 +749,11 @@ export function FlipCard({ asset, defaultState = 'front', interactive = true, cl
   const design = asset.manifest.design;
   const adaptiveCardPayload = getAdaptiveCardPayload(asset);
   const isChartCard = asset.category === 'chart';
+  const slideHostConfig = useMemo(() => {
+    if (asset.category !== 'slide' || !adaptiveCardPayload) return undefined;
+    const slideTheme = asset.manifest.schema?.['theme'] as Record<string, unknown> | undefined;
+    return buildSlideHostConfig(slideTheme) ?? undefined;
+  }, [asset.category, asset.manifest.schema, adaptiveCardPayload]);
   const classes = ['flip-card', 'fc-asset-card', getThemeClassName(asset.theme), className]
     .filter(Boolean)
     .join(' ');
@@ -740,7 +791,7 @@ export function FlipCard({ asset, defaultState = 'front', interactive = true, cl
               className={adaptiveCardPayload ? 'fc-asset-face-shell fc-asset-face-shell-adaptive' : 'fc-asset-face-shell'}
             >
               {adaptiveCardPayload ? (
-                <AdaptiveCardSurface payload={adaptiveCardPayload} />
+                <AdaptiveCardSurface payload={adaptiveCardPayload} hostConfig={slideHostConfig} />
               ) : (
                 <>
                   <header className="fc-asset-header">

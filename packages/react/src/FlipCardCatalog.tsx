@@ -15,6 +15,7 @@ const categoryOrder: FlipCardAssetCategory[] = [
   'pattern',
   'tile',
   'portfolio',
+  'slide',
 ];
 
 const categoryLabels: Record<FlipCardAssetCategory, string> = {
@@ -31,6 +32,7 @@ const categoryLabels: Record<FlipCardAssetCategory, string> = {
   pattern: 'Pattern assets',
   tile: 'Tile assets',
   portfolio: 'Portfolio assets',
+  slide: 'Adaptive Slide assets',
 };
 
 export function FlipCardCatalog({ assets, className }: FlipCardCatalogProps) {
