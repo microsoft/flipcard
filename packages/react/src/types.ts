@@ -13,7 +13,8 @@ export type FlipCardAssetCategory =
   | 'chart'
   | 'pattern'
   | 'tile'
-  | 'portfolio';
+  | 'portfolio'
+  | 'slide';
 
 export type FlipCardAssetTheme = 'light' | 'dark' | 'midnight-sapphire';
 
@@ -77,6 +78,7 @@ export interface FlipCardAssetDesign {
   media?: FlipCardDesignMedia;
   quote?: string;
   adaptiveCard?: Record<string, unknown>;
+  theme?: Record<string, unknown>;
 }
 
 export interface FlipCardRenderableManifest extends FlipCardManifest {
