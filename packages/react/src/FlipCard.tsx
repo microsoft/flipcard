@@ -50,8 +50,10 @@ function lightenHex(hex: string, amount: number): string {
 function buildSlideHostConfig(theme: Record<string, unknown> | undefined): Record<string, unknown> | null {
   if (!theme) return null;
   const bg = (theme.backgroundColor as string) || '#0f1729';
-  const accent = (theme.accentColor as string) || '#6366f1';
-  const emphasisBg = lightenHex(bg, 0.12);
+  const primary = (theme.primaryColor as string) || '#6366f1';
+  const accent = (theme.accentColor as string) || '#a78bfa';
+  const fontFamily = (theme.fontFamily as string) || 'Segoe UI, system-ui, sans-serif';
+  const emphasisBg = lightenHex(bg, 0.10);
 
   const baseFg = {
     default:   { default: '#ffffff', subtle: '#ffffffbb' },
@@ -66,18 +68,85 @@ function buildSlideHostConfig(theme: Record<string, unknown> | undefined): Recor
     default:   { default: '#ffffff', subtle: '#ffffffdd' },
     dark:      { default: '#ffffff', subtle: '#ffffffdd' },
     light:     { default: '#ffffff', subtle: '#ffffffee' },
+    accent:    { default: '#ffffff', subtle: '#ffffffdd' },
+    good:      { default: '#ffffff', subtle: '#ffffffdd' },
+    warning:   { default: '#ffffff', subtle: '#ffffffdd' },
+    attention: { default: '#ffffff', subtle: '#ffffffdd' },
   };
 
   return {
     supportsInteractivity: false,
+    fontFamily,
+    spacing: {
+      small: 4,
+      default: 8,
+      medium: 12,
+      large: 16,
+      extraLarge: 22,
+      padding: 12,
+    },
+    separator: {
+      lineThickness: 1,
+      lineColor: 'rgba(255, 255, 255, 0.16)',
+    },
     containerStyles: {
       default:   { backgroundColor: bg,        foregroundColors: baseFg },
       emphasis:  { backgroundColor: emphasisBg, foregroundColors: baseFg },
-      accent:    { backgroundColor: accent,     foregroundColors: whiteFg },
+      accent:    { backgroundColor: primary,    foregroundColors: whiteFg },
       good:      { backgroundColor: '#16a34a',  foregroundColors: whiteFg },
       attention: { backgroundColor: '#dc2626',  foregroundColors: whiteFg },
       warning:   { backgroundColor: '#d97706',  foregroundColors: whiteFg },
     },
+  };
+}
+
+interface SlideAuxiliaries {
+  styleVars: CSSProperties;
+  audience: string;
+  meta: string;
+}
+
+function getSlideAuxiliaries(asset: FlipCardRenderableAsset): SlideAuxiliaries | null {
+  if (asset.category !== 'slide') return null;
+  const schema = asset.manifest.schema as Record<string, unknown> | undefined;
+  const theme = schema?.theme as Record<string, unknown> | undefined;
+  const slide = schema?.slide as Record<string, unknown> | undefined;
+  const layoutMode =
+    ((slide?.layout as Record<string, unknown> | undefined)?.mode as string | undefined) ?? 'stack';
+  const gradient = (slide?.background as Record<string, unknown> | undefined)?.gradient as
+    | { type?: string; colors?: string[]; angle?: number }
+    | undefined;
+
+  const themeBg = (theme?.backgroundColor as string | undefined) ?? '#0f1729';
+  let bg: string = themeBg;
+  if (gradient && Array.isArray(gradient.colors) && gradient.colors.length >= 2) {
+    const angle = typeof gradient.angle === 'number' ? gradient.angle : 135;
+    bg = `linear-gradient(${angle}deg, ${gradient.colors.join(', ')})`;
+  }
+
+  const accent = (theme?.accentColor as string | undefined) ?? '#a78bfa';
+  const primary = (theme?.primaryColor as string | undefined) ?? '#6366f1';
+  const fontFamily = (theme?.fontFamily as string | undefined) ?? 'Segoe UI, system-ui, sans-serif';
+
+  const adaptiveCard = (asset.manifest.design as Record<string, unknown> | undefined)?.adaptiveCard as
+    | { version?: string }
+    | undefined;
+  const adaptiveVersion = adaptiveCard?.version ?? '1.6';
+  const audienceRaw =
+    ((asset.manifest.metadata as Record<string, unknown> | undefined)?.audience as string | undefined) ??
+    'Adaptive Slide';
+
+  const styleVars = {
+    ['--fc-slide-bg' as string]: bg,
+    ['--fc-slide-accent' as string]: accent,
+    ['--fc-slide-primary' as string]: primary,
+    ['--fc-slide-font' as string]: fontFamily,
+  } as CSSProperties;
+
+  return {
+    styleVars,
+    audience: audienceRaw.toUpperCase(),
+    meta: `AC ${adaptiveVersion} · ${layoutMode.toUpperCase()}`,
   };
 }
 
@@ -749,11 +818,13 @@ export function FlipCard({ asset, defaultState = 'front', interactive = true, cl
   const design = asset.manifest.design;
   const adaptiveCardPayload = getAdaptiveCardPayload(asset);
   const isChartCard = asset.category === 'chart';
+  const isSlideCard = asset.category === 'slide';
   const slideHostConfig = useMemo(() => {
     if (asset.category !== 'slide' || !adaptiveCardPayload) return undefined;
     const slideTheme = asset.manifest.schema?.['theme'] as Record<string, unknown> | undefined;
     return buildSlideHostConfig(slideTheme) ?? undefined;
   }, [asset.category, asset.manifest.schema, adaptiveCardPayload]);
+  const slideAux = useMemo(() => getSlideAuxiliaries(asset), [asset]);
   const classes = ['flip-card', 'fc-asset-card', getThemeClassName(asset.theme), className]
     .filter(Boolean)
     .join(' ');
@@ -784,6 +855,24 @@ export function FlipCard({ asset, defaultState = 'front', interactive = true, cl
           {isChartCard ? (
             <div ref={frontShellRef} className="fc-asset-face-shell fc-chart-face-shell">
               <ChartCardFront asset={asset} />
+            </div>
+          ) : isSlideCard && adaptiveCardPayload && slideAux ? (
+            <div
+              ref={frontShellRef}
+              className="fc-asset-face-shell fc-slide-face-shell"
+              style={slideAux.styleVars}
+            >
+              <header className="fc-slide-header">
+                <span className="fc-slide-eyebrow-brand">{slideAux.audience}</span>
+                <span className="fc-slide-meta">{slideAux.meta}</span>
+              </header>
+              <div className="fc-slide-stage">
+                <AdaptiveCardSurface payload={adaptiveCardPayload} hostConfig={slideHostConfig} />
+              </div>
+              <footer className="fc-slide-footer">
+                <span className="fc-slide-footer-title">{design?.headline ?? asset.title}</span>
+                {design?.badge ? <span className="fc-slide-footer-badge">{design.badge}</span> : null}
+              </footer>
             </div>
           ) : (
             <div
