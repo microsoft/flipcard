@@ -1,0 +1,46 @@
+{
+  "name": "@microsoft/flipcard",
+  "version": "0.1.0",
+  "description": "Vanilla FlipCard asset library with reusable manifests and DOM helpers",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./assets": {
+      "types": "./dist/assets.d.ts",
+      "import": "./dist/assets.js",
+      "require": "./dist/assets.cjs"
+    },
+    "./styles.css": "./styles/styles.css"
+  },
+  "files": [
+    "dist",
+    "styles",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts src/assets.ts --format esm,cjs --dts --clean --external @microsoft/flipcard-core",
+    "dev": "tsup src/index.ts src/assets.ts --format esm,cjs --watch",
+    "test": "vitest run --dir src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@microsoft/flipcard-core": "0.1.0",
+    "adaptivecards": "^3.0.6"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/flipcard.git",
+    "directory": "packages/vanilla"
+  }
+}

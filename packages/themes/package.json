@@ -1,0 +1,25 @@
+{
+  "name": "@microsoft/flipcard-themes",
+  "version": "0.1.0",
+  "description": "CSS themes and design tokens for FlipCard",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "require": "./dist/index.cjs" },
+    "./base.css": "./styles/base.css",
+    "./light.css": "./styles/light.css",
+    "./dark.css": "./styles/dark.css",
+    "./midnight-sapphire.css": "./styles/midnight-sapphire.css"
+  },
+  "files": ["dist", "styles", "README.md"],
+  "scripts": {
+    "build": "tsup src/index.ts src/tokens.ts --format esm,cjs --dts --clean",
+    "test": "vitest run --dir src --passWithNoTests",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": { "access": "public" },
+  "repository": { "type": "git", "url": "https://github.com/microsoft/flipcard.git", "directory": "packages/themes" }
+}

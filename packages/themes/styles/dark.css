@@ -1,0 +1,42 @@
+/*
+ * @microsoft/flipcard-themes — dark.css
+ *
+ * Dark theme tokens. Applies under `.fc-theme-dark`, and automatically
+ * under `prefers-color-scheme: dark` unless `.fc-theme-light` opts out.
+ */
+
+.fc-theme-dark {
+  --fc-bg: #0b0d10;
+  --fc-surface: #15181d;
+  --fc-text: #e5e7eb;
+  --fc-text-dim: #9ca3af;
+  --fc-border: #2a2f37;
+  --fc-accent: #60a5fa;
+  --fc-radius: 12px;
+  --fc-shadow:
+    0 1px 2px rgb(0 0 0 / 0.4),
+    0 4px 12px rgb(0 0 0 / 0.3);
+
+  --fc-back-bg: #0f1115;
+  --fc-back-text: #e5e7eb;
+  --fc-back-border: #2a2f37;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.fc-theme-light) {
+    --fc-bg: #0b0d10;
+    --fc-surface: #15181d;
+    --fc-text: #e5e7eb;
+    --fc-text-dim: #9ca3af;
+    --fc-border: #2a2f37;
+    --fc-accent: #60a5fa;
+    --fc-radius: 12px;
+    --fc-shadow:
+      0 1px 2px rgb(0 0 0 / 0.4),
+      0 4px 12px rgb(0 0 0 / 0.3);
+
+    --fc-back-bg: #0f1115;
+    --fc-back-text: #e5e7eb;
+    --fc-back-border: #2a2f37;
+  }
+}

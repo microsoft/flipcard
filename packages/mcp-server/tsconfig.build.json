@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "composite": false,
+    "emitDeclarationOnly": true,
+    "declaration": true,
+    "declarationMap": false,
+    "noEmit": false,
+    "baseUrl": ".",
+    "paths": {
+      "@microsoft/flipcard-core": ["./src/flipcard-core-shim.d.ts"]
+    }
+  },
+  "references": [],
+  "exclude": ["src/**/*.test.ts"]
+}

@@ -1,0 +1,43 @@
+{
+  "name": "@microsoft/flipcard-react",
+  "version": "0.1.0",
+  "description": "React components for FlipCard assets and manifest-backed card catalogs",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --dts --clean --external react --external react-dom --external @microsoft/flipcard-core",
+    "dev": "tsup src/index.ts --format esm,cjs --watch",
+    "test": "vitest run --dir src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@microsoft/flipcard-core": "0.1.0",
+    "adaptivecards": "^3.0.6"
+  },
+  "peerDependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/flipcard.git",
+    "directory": "packages/react"
+  }
+}

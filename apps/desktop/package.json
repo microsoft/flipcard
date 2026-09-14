@@ -1,0 +1,21 @@
+{
+  "name": "@microsoft/flipcard-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Native Windows desktop wrapper for the FlipCard showcase, powered by Tauri 2.x.",
+  "license": "MIT",
+  "scripts": {
+    "tauri": "tauri",
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "build:msix": "tauri build --bundles msi,nsis",
+    "gen:icons": "node ./scripts/gen-placeholder-icons.mjs"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "^2.11.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0",
+    "pngjs": "^7.0.0"
+  }
+}

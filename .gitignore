@@ -1,0 +1,115 @@
+# Dependencies
+node_modules
+
+# Build output
+dist
+build
+out
+.docusaurus
+_site
+*.tsbuildinfo
+
+# Caches
+.turbo
+.vite
+.cache
+.eslintcache
+.parcel-cache
+
+# Test artifacts
+coverage
+.nyc_output
+*.lcov
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Env files
+.env
+.env.local
+.env.*.local
+
+# Editors / IDEs
+.idea
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# Local debug / scratch artifacts
+extract_out.txt
+extract_*.txt
+*.tmp
+*.bak
+scratch/
+tmp/
+
+# Secrets & credentials (never commit)
+*.pem
+*.key
+*.pfx
+*.p12
+*.cer
+*.crt
+*.jks
+*.keystore
+id_rsa
+id_rsa.*
+id_ed25519
+id_ed25519.*
+id_ecdsa
+id_ecdsa.*
+*.ppk
+secrets.json
+secrets.yaml
+secrets.yml
+secrets.txt
+credentials
+credentials.json
+credentials.yaml
+credentials.yml
+.npmrc
+.yarnrc
+.netrc
+auth.json
+appsettings.*.json
+!appsettings.Development.json
+!appsettings.Production.json
+local.settings.json
+azure.json
+.azure/
+.aws/
+.gcp/
+gha-creds-*.json
+service-account*.json
+*-key.json
+
+# Signing / certificates
+*.snk
+*.cer
+codesign/
+*.mobileprovision
+*.provisionprofile
+
+# Telemetry / personal dumps
+*.dmp
+*.heapsnapshot
+*.cpuprofile
+.history/
+.vshistory/
+
+# OS extras
+ehthumbs.db
+*.lnk

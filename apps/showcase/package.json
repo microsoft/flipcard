@@ -1,0 +1,21 @@
+{
+  "name": "@microsoft/flipcard-showcase",
+  "version": "0.1.0",
+  "private": true,
+  "description": "FlipDeck — interactive gallery for the FlipCard asset library",
+  "license": "MIT",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@microsoft/flipcard": "0.1.0",
+    "@microsoft/flipcard-react": "0.1.0",
+    "@microsoft/flipcard-themes": "0.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^19.2.5"
+  }
+}

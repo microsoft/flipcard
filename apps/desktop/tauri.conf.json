@@ -1,0 +1,49 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "FlipCard Studio",
+  "version": "0.1.0",
+  "identifier": "com.microsoft.flipcard",
+  "build": {
+    "beforeBuildCommand": "cd ../.. && npm run build:showcase",
+    "beforeDevCommand": "cd ../../apps/showcase && npm run dev",
+    "frontendDist": "../showcase/dist",
+    "devUrl": "http://localhost:5173"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "FlipCard Studio",
+        "width": 1400,
+        "height": 900,
+        "minWidth": 800,
+        "minHeight": 600,
+        "resizable": true,
+        "fullscreen": false
+      }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["msi", "nsis"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
+    ],
+    "category": "DeveloperTool",
+    "shortDescription": "Adaptive manifest schema-driven composable UI library",
+    "longDescription": "FlipCard is the first primitive in an adaptive, manifest schema-driven, composable UI system. Front = rendered design. Back = schema/manifest. Click to flip. FlipCard separates design, schema, and workflow so each can evolve independently. FlipCard Studio bundles the showcase library so designers and developers can browse the catalog offline and integrate via the bundled MCP server.",
+    "publisher": "Microsoft",
+    "copyright": "Copyright © 2026 Microsoft",
+    "windows": {
+      "webviewInstallMode": {
+        "type": "embedBootstrapper"
+      }
+    }
+  }
+}

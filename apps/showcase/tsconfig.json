@@ -1,0 +1,20 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "types": ["vite/client"],
+    "paths": {
+      "@microsoft/flipcard": ["../../packages/vanilla/src/index.ts"],
+      "@microsoft/flipcard-react": ["../../packages/react/src/index.ts"],
+      "@microsoft/flipcard-themes": ["../../packages/themes/src/index.ts"]
+    }
+  },
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "../../packages/vanilla/src/**/*.ts",
+    "../../packages/react/src/**/*.ts",
+    "../../packages/react/src/**/*.tsx",
+    "../../packages/themes/src/**/*.ts"
+  ]
+}

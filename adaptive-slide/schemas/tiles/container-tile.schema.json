@@ -1,0 +1,57 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-slide.dev/schemas/tiles/container-tile.schema.json",
+  "title": "Container Tile",
+  "description": "A tile that nests other tiles — enables multi-column layouts, grouped content, and card-in-card composition.",
+  "type": "object",
+  "required": ["type", "items"],
+  "allOf": [{ "$ref": "../tile.schema.json#/$defs/TileBase" }],
+  "properties": {
+    "type": { "const": "Tile.Container" },
+    "items": {
+      "type": "array",
+      "items": {
+        "$ref": "../tile.schema.json"
+      },
+      "description": "Nested tiles within this container"
+    },
+    "layout": {
+      "type": "string",
+      "enum": ["stack", "row", "wrap"],
+      "default": "stack",
+      "description": "stack: vertical, row: horizontal, wrap: flex-wrap"
+    },
+    "style": {
+      "type": "string",
+      "enum": ["default", "emphasis", "good", "attention", "warning", "accent"],
+      "default": "default"
+    },
+    "bleed": {
+      "type": "boolean",
+      "default": false,
+      "description": "Whether the container bleeds to the edge of its parent"
+    },
+    "minHeight": {
+      "type": "string",
+      "description": "Minimum height (CSS value)"
+    },
+    "verticalContentAlignment": {
+      "type": "string",
+      "enum": ["top", "center", "bottom"],
+      "default": "top"
+    },
+    "backgroundImage": {
+      "type": "object",
+      "properties": {
+        "url": { "type": "string", "format": "uri" },
+        "fillMode": {
+          "type": "string",
+          "enum": ["cover", "contain", "repeat", "stretch"],
+          "default": "cover"
+        }
+      },
+      "required": ["url"]
+    }
+  },
+  "unevaluatedProperties": false
+}

@@ -1,0 +1,35 @@
+{
+  "name": "@microsoft/flipcard-mcp",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "flipcard-mcp": "./dist/cli.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts src/cli.ts --format esm --dts --clean --external @microsoft/flipcard-core --external @modelcontextprotocol/sdk",
+    "dev": "tsup src/index.ts src/cli.ts --format esm --dts --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit",
+    "start": "node dist/cli.js"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "@microsoft/flipcard-core": "0.1.0",
+    "zod": "^4.4.1"
+  },
+  "files": ["dist", "README.md"],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

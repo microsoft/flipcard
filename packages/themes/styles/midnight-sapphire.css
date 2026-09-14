@@ -1,0 +1,24 @@
+/*
+ * @microsoft/flipcard-themes — midnight-sapphire.css
+ *
+ * Premium dark theme: deep navy surfaces, sapphire accents, soft gold for
+ * dimmed text and back-face highlights.
+ */
+
+.fc-theme-midnight-sapphire {
+  --fc-bg: #060a18;
+  --fc-surface: #0c1430;
+  --fc-text: #e6ebff;
+  --fc-text-dim: #c8a96a;
+  --fc-border: #1b2552;
+  --fc-accent: #4f8cff;
+  --fc-radius: 14px;
+  --fc-shadow:
+    0 1px 2px rgb(0 0 0 / 0.55),
+    0 8px 28px rgb(8 18 64 / 0.55),
+    0 0 0 1px rgb(79 140 255 / 0.08) inset;
+
+  --fc-back-bg: #091126;
+  --fc-back-text: #f4e9c8;
+  --fc-back-border: #2a3a78;
+}

@@ -1,0 +1,23 @@
+{
+  "name": "@microsoft/flipcard-core",
+  "version": "0.1.0",
+  "description": "Framework-agnostic core for FlipCard — types, schema, controller",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js", "require": "./dist/index.cjs" },
+    "./schema": { "types": "./dist/schema.d.ts", "import": "./dist/schema.js", "require": "./dist/schema.cjs" }
+  },
+  "files": ["dist", "README.md"],
+  "scripts": {
+    "build": "tsup src/index.ts src/schema.ts --format esm,cjs --dts --clean",
+    "dev": "tsup src/index.ts src/schema.ts --format esm,cjs --watch",
+    "test": "vitest run --dir src",
+    "typecheck": "tsc --noEmit"
+  },
+  "publishConfig": { "access": "public" },
+  "repository": { "type": "git", "url": "https://github.com/microsoft/flipcard.git", "directory": "packages/core" }
+}

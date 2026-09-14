@@ -1,0 +1,86 @@
+# Build & release the FlipCard Studio desktop app on tag pushes (v*) or on demand.
+#
+# Code signing is intentionally NOT enabled. To enable, store a base64-encoded
+# .pfx as the `WINDOWS_CERTIFICATE` secret and its password as
+# `WINDOWS_CERTIFICATE_PASSWORD`, then add a step before "Build desktop" that:
+#   - decodes the secret to a file
+#   - sets TAURI_SIGNING_PRIVATE_KEY / TAURI_SIGNING_PRIVATE_KEY_PASSWORD or
+#     uses signtool.exe in a post-build step on the produced MSI/NSIS bundles.
+# See apps/desktop/MSIX.md for the equivalent MSIX signing flow.
+
+name: desktop-release
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    name: Build (windows-latest)
+    runs-on: windows-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Setup Rust (stable)
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache Rust
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+
+      - name: Install workspace dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Generate placeholder icons
+        working-directory: apps/desktop
+        run: npm run gen:icons
+
+      - name: Build showcase (frontend dist)
+        run: npm run build:showcase
+
+      - name: Build desktop (MSI + NSIS)
+        run: npm run build -w @microsoft/flipcard-desktop
+
+      - name: Collect bundle artifacts
+        shell: pwsh
+        run: |
+          $bundle = "apps/desktop/src-tauri/target/release/bundle"
+          New-Item -ItemType Directory -Force -Path artifacts | Out-Null
+          if (Test-Path "$bundle/msi") {
+            Copy-Item "$bundle/msi/*.msi" -Destination artifacts -Force
+          }
+          if (Test-Path "$bundle/nsis") {
+            Copy-Item "$bundle/nsis/*-setup.exe" -Destination artifacts -Force
+          }
+          Get-ChildItem artifacts | Format-Table Name,Length
+
+      - name: Upload bundle artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: flipcard-desktop-windows
+          path: artifacts/*
+          if-no-files-found: error
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v3
+        with:
+          files: artifacts/*
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(github.ref_name, '-') }}

@@ -1,0 +1,24 @@
+/*
+ * @microsoft/flipcard-themes — light.css
+ *
+ * Light theme tokens. Applied to `:root` and to any subtree explicitly
+ * tagged with `.fc-theme-light`.
+ */
+
+:root,
+.fc-theme-light {
+  --fc-bg: #fafbfc;
+  --fc-surface: #ffffff;
+  --fc-text: #111827;
+  --fc-text-dim: #6b7280;
+  --fc-border: #e5e7eb;
+  --fc-accent: #2563eb;
+  --fc-radius: 12px;
+  --fc-shadow:
+    0 1px 2px rgb(0 0 0 / 0.06),
+    0 4px 12px rgb(0 0 0 / 0.04);
+
+  --fc-back-bg: #f3f4f6;
+  --fc-back-text: #111827;
+  --fc-back-border: #d1d5db;
+}
