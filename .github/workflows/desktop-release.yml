@@ -30,7 +30,7 @@ jobs:
         uses: actions/checkout@v7
 
       - name: Setup Node 20
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: '20'
           cache: 'npm'
@@ -39,7 +39,7 @@ jobs:
         uses: dtolnay/rust-toolchain@stable
 
       - name: Cache Rust
-        uses: Swatinem/rust-cache@v2
+        uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
         with:
           workspaces: apps/desktop/src-tauri -> target
 
@@ -70,7 +70,9 @@ jobs:
           Get-ChildItem artifacts | Format-Table Name,Length
 
       - name: Upload bundle artifacts
+
         uses: actions/upload-artifact@v7
+
         with:
           name: flipcard-desktop-windows
           path: artifacts/*
@@ -78,7 +80,9 @@ jobs:
 
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
+
         uses: softprops/action-gh-release@v3
+
         with:
           files: artifacts/*
           generate_release_notes: true
