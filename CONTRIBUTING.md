@@ -18,23 +18,24 @@ npm run build:libs
 Useful commands:
 
 ```bash
-npm run dev
-npm run storybook
+npm run dev          # FlipDeck (Vite dev server for apps/showcase)
 npm run lint
 npm run typecheck
 npm run test
 npm run build
 ```
 
-## Adding a Storybook story
+## Adding a FlipDeck asset
 
-Add stories close to the package they document:
+The FlipDeck gallery dogfoods the `flipCardAssetLibrary` exported from
+`@microsoft/flipcard`. To add a new card to the deck:
 
-- React stories: `packages/react/stories/*.stories.tsx`
-- Package-local source stories: `packages/*/src/**/*.stories.tsx`
-- Web component stories: `packages/vanilla/stories/*.stories.ts`
+- Add the asset entry to `packages/vanilla/src/assets.ts` (typed as `FlipCardAssetEntry`).
+- Pick an existing `FlipCardAssetCategory` or extend the enum in `packages/vanilla/src/types.ts`
+  and update `flipCardCategoryLabels` in the same file.
+- Run `npm run dev` and verify the card renders, flips, and themes correctly.
 
-Prefer stories that demonstrate:
+Prefer assets that demonstrate:
 
 - the default path
 - controlled and uncontrolled behavior
@@ -46,7 +47,7 @@ Prefer stories that demonstrate:
 1. Create the package under `packages/<name>`.
 2. Add a `package.json`, `tsconfig.json`, source entrypoint, and README.
 3. Export clean public APIs.
-4. Add tests and at least one Storybook story when UI-facing.
+4. Add tests, and a FlipDeck asset when the package is UI-facing.
 5. Wire the package into root scripts or workspace references if needed.
 
 ## Testing
@@ -63,7 +64,7 @@ npm run build
 ## Pull requests
 
 - Keep changes focused and documented.
-- Add or update stories for UI behavior changes.
+- Add or update FlipDeck assets for UI behavior changes.
 - Conventional Commits are encouraged.
 
 ## Code of Conduct

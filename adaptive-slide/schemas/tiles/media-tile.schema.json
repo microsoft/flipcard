@@ -1,0 +1,51 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-slide.dev/schemas/tiles/media-tile.schema.json",
+  "title": "Media Tile",
+  "description": "A tile for embedding video or audio content.",
+  "type": "object",
+  "required": ["type", "sources"],
+  "allOf": [{ "$ref": "../tile.schema.json#/$defs/TileBase" }],
+  "properties": {
+    "type": { "const": "Tile.Media" },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["url"],
+        "properties": {
+          "url": { "type": "string", "format": "uri" },
+          "mimeType": { "type": "string" }
+        }
+      },
+      "minItems": 1,
+      "description": "Media sources (multiple for format fallback)"
+    },
+    "poster": {
+      "type": "string",
+      "format": "uri",
+      "description": "Poster/thumbnail image URL"
+    },
+    "altText": {
+      "type": "string"
+    },
+    "autoplay": {
+      "type": "boolean",
+      "default": false
+    },
+    "loop": {
+      "type": "boolean",
+      "default": false
+    },
+    "muted": {
+      "type": "boolean",
+      "default": false
+    },
+    "aspectRatio": {
+      "type": "string",
+      "pattern": "^\\d+:\\d+$",
+      "default": "16:9"
+    }
+  },
+  "unevaluatedProperties": false
+}

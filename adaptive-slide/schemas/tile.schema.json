@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-slide.dev/schemas/tile.schema.json",
+  "title": "Adaptive Tile",
+  "description": "Base schema for an Adaptive Tile — the atomic content unit within a slide's Adaptive Card bucket. Each tile type extends this base with its own card schema.",
+  "type": "object",
+  "required": ["type"],
+  "discriminator": {
+    "propertyName": "type"
+  },
+  "oneOf": [
+    { "$ref": "tiles/text-tile.schema.json" },
+    { "$ref": "tiles/image-tile.schema.json" },
+    { "$ref": "tiles/code-tile.schema.json" },
+    { "$ref": "tiles/chart-tile.schema.json" },
+    { "$ref": "tiles/media-tile.schema.json" },
+    { "$ref": "tiles/container-tile.schema.json" }
+  ],
+  "$defs": {
+    "TileBase": {
+      "type": "object",
+      "description": "Common properties shared by all tile types",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "Discriminator for the tile type"
+        },
+        "id": {
+          "type": "string",
+          "description": "Unique identifier for this tile within the slide"
+        },
+        "isVisible": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether this tile is visible"
+        },
+        "spacing": {
+          "type": "string",
+          "enum": ["none", "small", "default", "medium", "large", "extraLarge", "padding"],
+          "default": "default"
+        },
+        "separator": {
+          "type": "boolean",
+          "default": false,
+          "description": "Draw a separator line above this tile"
+        },
+        "gridPosition": {
+          "$ref": "#/$defs/GridPosition",
+          "description": "Position within a grid layout (only used when slide layout is 'grid')"
+        },
+        "freeformPosition": {
+          "$ref": "#/$defs/FreeformPosition",
+          "description": "Absolute position within a freeform layout"
+        }
+      },
+      "required": ["type"]
+    },
+    "GridPosition": {
+      "type": "object",
+      "properties": {
+        "column": { "type": "integer", "minimum": 1 },
+        "row": { "type": "integer", "minimum": 1 },
+        "columnSpan": { "type": "integer", "minimum": 1, "default": 1 },
+        "rowSpan": { "type": "integer", "minimum": 1, "default": 1 }
+      },
+      "additionalProperties": false
+    },
+    "FreeformPosition": {
+      "type": "object",
+      "properties": {
+        "x": { "type": "number", "description": "X position as percentage (0-100)" },
+        "y": { "type": "number", "description": "Y position as percentage (0-100)" },
+        "width": { "type": "number", "description": "Width as percentage (0-100)" },
+        "height": { "type": "number", "description": "Height as percentage (0-100)" },
+        "rotation": { "type": "number", "default": 0, "description": "Rotation in degrees" },
+        "zIndex": { "type": "integer", "default": 0 }
+      },
+      "required": ["x", "y", "width", "height"],
+      "additionalProperties": false
+    }
+  }
+}

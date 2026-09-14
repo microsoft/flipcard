@@ -1,0 +1,96 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-slide.dev/schemas/deck.schema.json",
+  "title": "Adaptive Slide Deck",
+  "description": "Root schema for an Adaptive Slide presentation deck. A deck is an ordered collection of slides with shared metadata and theming.",
+  "type": "object",
+  "required": ["$schema", "type", "version", "slides"],
+  "additionalProperties": false,
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "URI reference to this schema for validation"
+    },
+    "type": {
+      "const": "AdaptiveDeck",
+      "description": "Discriminator identifying this as a deck"
+    },
+    "version": {
+      "type": "string",
+      "pattern": "^\\d+\\.\\d+(\\.\\d+)?$",
+      "description": "Semantic version of the deck format (e.g. '1.0.0')"
+    },
+    "metadata": {
+      "$ref": "#/$defs/DeckMetadata"
+    },
+    "theme": {
+      "$ref": "#/$defs/Theme"
+    },
+    "slides": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "$ref": "slide.schema.json"
+      },
+      "description": "Ordered array of slides in the presentation"
+    },
+    "defaults": {
+      "$ref": "#/$defs/SlideDefaults",
+      "description": "Default settings inherited by all slides unless overridden"
+    }
+  },
+  "$defs": {
+    "DeckMetadata": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "author": { "type": "string" },
+        "created": { "type": "string", "format": "date-time" },
+        "modified": { "type": "string", "format": "date-time" },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "language": {
+          "type": "string",
+          "description": "BCP 47 language tag (e.g. 'en-US')"
+        }
+      },
+      "additionalProperties": true
+    },
+    "Theme": {
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "primaryColor": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "accentColor": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "backgroundColor": { "type": "string", "pattern": "^#[0-9a-fA-F]{6}$" },
+        "fontFamily": { "type": "string" },
+        "darkMode": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": true
+    },
+    "SlideDefaults": {
+      "type": "object",
+      "properties": {
+        "layout": {
+          "type": "string",
+          "enum": ["stack", "grid", "freeform"],
+          "default": "stack"
+        },
+        "transition": {
+          "type": "string",
+          "enum": ["none", "fade", "slide-left", "slide-right", "slide-up", "zoom"],
+          "default": "none"
+        },
+        "padding": {
+          "type": "string",
+          "enum": ["none", "small", "default", "large"],
+          "default": "default"
+        }
+      },
+      "additionalProperties": true
+    }
+  }
+}

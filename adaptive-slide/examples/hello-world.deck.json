@@ -1,0 +1,214 @@
+{
+  "$schema": "./schemas/deck.schema.json",
+  "type": "AdaptiveDeck",
+  "version": "1.0.0",
+  "metadata": {
+    "title": "Hello World — Adaptive Slide Demo",
+    "description": "A sample deck exercising all built-in tile types",
+    "author": "Adaptive Slide",
+    "tags": ["demo", "example", "hello-world"]
+  },
+  "theme": {
+    "name": "Blue",
+    "primaryColor": "#0078d4",
+    "accentColor": "#50e6ff",
+    "backgroundColor": "#ffffff",
+    "fontFamily": "Segoe UI, sans-serif",
+    "darkMode": false
+  },
+  "defaults": {
+    "layout": "stack",
+    "transition": "fade",
+    "padding": "default"
+  },
+  "slides": [
+    {
+      "type": "AdaptiveSlide",
+      "id": "slide-title",
+      "title": "Title Slide",
+      "background": {
+        "gradient": {
+          "type": "linear",
+          "colors": ["#0078d4", "#50e6ff"],
+          "angle": 135
+        }
+      },
+      "body": [
+        {
+          "type": "Tile.Text",
+          "text": "Adaptive Slide",
+          "style": "heading",
+          "size": "extraLarge",
+          "weight": "bolder",
+          "color": "light",
+          "horizontalAlignment": "center",
+          "spacing": "extraLarge"
+        },
+        {
+          "type": "Tile.Text",
+          "text": "Schema-driven presentations built on Adaptive Cards",
+          "style": "subheading",
+          "color": "light",
+          "horizontalAlignment": "center"
+        }
+      ],
+      "notes": "Welcome the audience. Introduce the concept of schema-driven presentations."
+    },
+    {
+      "type": "AdaptiveSlide",
+      "id": "slide-architecture",
+      "title": "Architecture",
+      "body": [
+        {
+          "type": "Tile.Text",
+          "text": "How It Works",
+          "style": "heading",
+          "size": "large"
+        },
+        {
+          "type": "Tile.Text",
+          "text": "Every deck is a JSON file. Slides are Adaptive Card buckets. Tiles are the content atoms.",
+          "style": "body"
+        },
+        {
+          "type": "Tile.Code",
+          "language": "json",
+          "title": "deck-structure.json",
+          "code": "{\n  \"type\": \"AdaptiveDeck\",\n  \"slides\": [\n    {\n      \"type\": \"AdaptiveSlide\",\n      \"body\": [\n        { \"type\": \"Tile.Text\", \"text\": \"Hello!\" }\n      ]\n    }\n  ]\n}",
+          "showLineNumbers": true,
+          "theme": "dark"
+        }
+      ]
+    },
+    {
+      "type": "AdaptiveSlide",
+      "id": "slide-tiles",
+      "title": "Tile Types",
+      "layout": {
+        "mode": "grid",
+        "columns": 2,
+        "gap": "default"
+      },
+      "body": [
+        {
+          "type": "Tile.Text",
+          "text": "📝 Text Tile",
+          "style": "heading",
+          "size": "medium",
+          "gridPosition": { "column": 1, "row": 1 }
+        },
+        {
+          "type": "Tile.Image",
+          "url": "https://adaptivecards.io/content/cats/1.png",
+          "altText": "A sample image tile showing a cat",
+          "size": "medium",
+          "horizontalAlignment": "center",
+          "caption": "Image Tile with caption",
+          "gridPosition": { "column": 2, "row": 1 }
+        },
+        {
+          "type": "Tile.Code",
+          "code": "console.log('Hello from a Code Tile!');",
+          "language": "javascript",
+          "showLineNumbers": false,
+          "gridPosition": { "column": 1, "row": 2 }
+        },
+        {
+          "type": "Tile.Chart",
+          "chartType": "bar",
+          "title": "Chart Tile",
+          "data": {
+            "labels": ["Q1", "Q2", "Q3", "Q4"],
+            "datasets": [
+              {
+                "label": "Revenue",
+                "values": [12, 19, 8, 15],
+                "color": "#0078d4"
+              }
+            ]
+          },
+          "gridPosition": { "column": 2, "row": 2 }
+        }
+      ]
+    },
+    {
+      "type": "AdaptiveSlide",
+      "id": "slide-container",
+      "title": "Container Tile",
+      "body": [
+        {
+          "type": "Tile.Text",
+          "text": "Nested Layouts with Container Tiles",
+          "style": "heading"
+        },
+        {
+          "type": "Tile.Container",
+          "layout": "row",
+          "style": "emphasis",
+          "items": [
+            {
+              "type": "Tile.Text",
+              "text": "**Left column** — text content with markdown support",
+              "style": "body"
+            },
+            {
+              "type": "Tile.Text",
+              "text": "**Right column** — tiles nest inside containers for complex layouts",
+              "style": "body"
+            }
+          ]
+        },
+        {
+          "type": "Tile.Container",
+          "layout": "row",
+          "style": "accent",
+          "items": [
+            {
+              "type": "Tile.Text",
+              "text": "Containers can use different styles: `default`, `emphasis`, `good`, `attention`, `warning`, `accent`",
+              "style": "caption"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "AdaptiveSlide",
+      "id": "slide-end",
+      "title": "Thank You",
+      "background": {
+        "color": "#0078d4"
+      },
+      "body": [
+        {
+          "type": "Tile.Text",
+          "text": "Thank You!",
+          "style": "heading",
+          "size": "extraLarge",
+          "color": "light",
+          "horizontalAlignment": "center",
+          "spacing": "extraLarge"
+        },
+        {
+          "type": "Tile.Text",
+          "text": "Built with ❤️ on Adaptive Cards",
+          "style": "body",
+          "color": "light",
+          "horizontalAlignment": "center"
+        }
+      ],
+      "actions": [
+        {
+          "type": "Action.OpenUrl",
+          "title": "Learn More",
+          "url": "https://adaptivecards.io/"
+        },
+        {
+          "type": "Action.GoToSlide",
+          "title": "Back to Start",
+          "targetSlideId": "slide-title"
+        }
+      ]
+    }
+  ]
+}

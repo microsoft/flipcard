@@ -1,0 +1,27 @@
+/**
+ * FlipCard documentation theme overrides.
+ * Aligned with the FlipCard design tokens in @microsoft/flipcard-themes.
+ */
+
+:root {
+  --ifm-color-primary: #2563eb;
+  --ifm-color-primary-dark: #1f54d4;
+  --ifm-color-primary-darker: #1d4fc8;
+  --ifm-color-primary-darkest: #1841a4;
+  --ifm-color-primary-light: #3a72ed;
+  --ifm-color-primary-lighter: #4779ee;
+  --ifm-color-primary-lightest: #6890f1;
+  --ifm-code-font-size: 95%;
+  --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.08);
+}
+
+[data-theme='dark'] {
+  --ifm-color-primary: #60a5fa;
+  --ifm-color-primary-dark: #3f93f9;
+  --ifm-color-primary-darker: #2e8af8;
+  --ifm-color-primary-darkest: #086fec;
+  --ifm-color-primary-light: #81b7fb;
+  --ifm-color-primary-lighter: #92c1fc;
+  --ifm-color-primary-lightest: #c5dffd;
+  --docusaurus-highlighted-code-line-bg: rgba(255, 255, 255, 0.10);
+}

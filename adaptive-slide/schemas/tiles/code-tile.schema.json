@@ -1,0 +1,48 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-slide.dev/schemas/tiles/code-tile.schema.json",
+  "title": "Code Tile",
+  "description": "A tile for displaying syntax-highlighted code blocks.",
+  "type": "object",
+  "required": ["type", "code"],
+  "allOf": [{ "$ref": "../tile.schema.json#/$defs/TileBase" }],
+  "properties": {
+    "type": { "const": "Tile.Code" },
+    "code": {
+      "type": "string",
+      "description": "The source code content"
+    },
+    "language": {
+      "type": "string",
+      "description": "Programming language for syntax highlighting (e.g. 'typescript', 'python', 'json')"
+    },
+    "showLineNumbers": {
+      "type": "boolean",
+      "default": true
+    },
+    "startLineNumber": {
+      "type": "integer",
+      "minimum": 1,
+      "default": 1
+    },
+    "highlightLines": {
+      "type": "array",
+      "items": { "type": "integer" },
+      "description": "Line numbers to highlight/emphasize"
+    },
+    "maxHeight": {
+      "type": "string",
+      "description": "Maximum height before scrolling (CSS value)"
+    },
+    "title": {
+      "type": "string",
+      "description": "Optional filename or title shown above the code block"
+    },
+    "theme": {
+      "type": "string",
+      "enum": ["light", "dark", "auto"],
+      "default": "auto"
+    }
+  },
+  "unevaluatedProperties": false
+}

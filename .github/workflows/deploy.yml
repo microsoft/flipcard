@@ -19,25 +19,37 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v6
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
         with:
-          node-version: '20'
+          node-version: '22'
           cache: npm
       - run: npm ci
       - run: npm run build:libs
-      - run: GITHUB_PAGES=true npm run build:showcase
+      - name: Build documentation site
+        working-directory: docs
         env:
           GITHUB_PAGES: 'true'
-      - run: npm run build:storybook
+        run: |
+          npm ci
+          npm run build
+      - run: GITHUB_PAGES=true npm run build:flipdeck
+        env:
+          GITHUB_PAGES: 'true'
       - name: Compose deploy site
         run: |
           mkdir -p _site
-          cp -r apps/showcase/dist/* _site/
-          mkdir -p _site/storybook
-          cp -r storybook-static/* _site/storybook/
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+          cp -r docs/build/* _site/
+          mkdir -p _site/flipdeck
+          cp -r apps/showcase/dist/* _site/flipdeck/
+          mkdir -p _site/showcase
+          cp -r apps/showcase/dist/* _site/showcase/
+          node --input-type=module -e 'import { mkdirSync, writeFileSync } from "node:fs"; import { flipCardManifestSchema } from "./packages/core/dist/schema.js"; mkdirSync("_site/schema", { recursive: true }); writeFileSync("_site/schema/v0.1.json", JSON.stringify(flipCardManifestSchema, null, 2) + "\n");'
+=
+      - uses: actions/configure-pages@v6
+        with:
+          enablement: true
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: _site
 
@@ -49,4 +61,5 @@ jobs:
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - id: deployment
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
+

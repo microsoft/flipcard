@@ -1,6 +1,5 @@
 dist
-node_modules
-storybook-static
+node_modules
 coverage
 *.min.js
 *.min.css

@@ -1,0 +1,55 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-slide.dev/schemas/tiles/text-tile.schema.json",
+  "title": "Text Tile",
+  "description": "A tile for rich text content — headings, paragraphs, and inline formatting. Maps to Adaptive Cards TextBlock and RichTextBlock.",
+  "type": "object",
+  "required": ["type", "text"],
+  "allOf": [{ "$ref": "../tile.schema.json#/$defs/TileBase" }],
+  "properties": {
+    "type": { "const": "Tile.Text" },
+    "text": {
+      "type": "string",
+      "description": "Text content. Supports markdown subset (bold, italic, links)."
+    },
+    "style": {
+      "type": "string",
+      "enum": ["heading", "subheading", "body", "caption", "quote"],
+      "default": "body"
+    },
+    "size": {
+      "type": "string",
+      "enum": ["small", "default", "medium", "large", "extraLarge"],
+      "default": "default"
+    },
+    "weight": {
+      "type": "string",
+      "enum": ["lighter", "default", "bolder"],
+      "default": "default"
+    },
+    "color": {
+      "type": "string",
+      "enum": ["default", "dark", "light", "accent", "good", "warning", "attention"],
+      "default": "default"
+    },
+    "horizontalAlignment": {
+      "type": "string",
+      "enum": ["left", "center", "right"],
+      "default": "left"
+    },
+    "wrap": {
+      "type": "boolean",
+      "default": true
+    },
+    "maxLines": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "fontType": {
+      "type": "string",
+      "enum": ["default", "monospace"],
+      "default": "default"
+    }
+  },
+  "unevaluatedProperties": false
+}

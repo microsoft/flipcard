@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-slide.dev/schemas/tiles/chart-tile.schema.json",
+  "title": "Chart Tile",
+  "description": "A tile for rendering data visualizations — bar, line, pie, and donut charts.",
+  "type": "object",
+  "required": ["type", "chartType", "data"],
+  "allOf": [{ "$ref": "../tile.schema.json#/$defs/TileBase" }],
+  "properties": {
+    "type": { "const": "Tile.Chart" },
+    "chartType": {
+      "type": "string",
+      "enum": ["bar", "line", "pie", "donut", "area", "scatter"],
+      "description": "Type of chart to render"
+    },
+    "title": {
+      "type": "string",
+      "description": "Chart title"
+    },
+    "data": {
+      "$ref": "#/$defs/ChartData"
+    },
+    "showLegend": {
+      "type": "boolean",
+      "default": true
+    },
+    "showGrid": {
+      "type": "boolean",
+      "default": true
+    },
+    "colors": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Custom color palette for data series"
+    },
+    "aspectRatio": {
+      "type": "string",
+      "pattern": "^\\d+:\\d+$",
+      "default": "16:9"
+    }
+  },
+  "unevaluatedProperties": false,
+  "$defs": {
+    "ChartData": {
+      "type": "object",
+      "required": ["labels", "datasets"],
+      "properties": {
+        "labels": {
+          "type": "array",
+          "items": { "type": "string" },
+          "description": "Category labels (x-axis for bar/line)"
+        },
+        "datasets": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["values"],
+            "properties": {
+              "label": { "type": "string" },
+              "values": {
+                "type": "array",
+                "items": { "type": "number" }
+              },
+              "color": { "type": "string" }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    }
+  }
+}

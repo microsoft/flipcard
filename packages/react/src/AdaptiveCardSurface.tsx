@@ -3,9 +3,10 @@ import * as AdaptiveCards from 'adaptivecards';
 
 export interface AdaptiveCardSurfaceProps {
   payload: Record<string, unknown>;
+  hostConfig?: Record<string, unknown>;
 }
 
-export function AdaptiveCardSurface({ payload }: AdaptiveCardSurfaceProps) {
+export function AdaptiveCardSurface({ payload, hostConfig }: AdaptiveCardSurfaceProps) {
   const ref = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -14,6 +15,9 @@ export function AdaptiveCardSurface({ payload }: AdaptiveCardSurfaceProps) {
     if (!host) return;
     try {
       const card = new AdaptiveCards.AdaptiveCard();
+      if (hostConfig) {
+        card.hostConfig = new AdaptiveCards.HostConfig(hostConfig);
+      }
       card.parse(payload);
       const rendered = card.render();
       if (rendered) {
@@ -28,7 +32,7 @@ export function AdaptiveCardSurface({ payload }: AdaptiveCardSurfaceProps) {
     return () => {
       host.replaceChildren();
     };
-  }, [payload]);
+  }, [payload, hostConfig]);
 
   return (
     <div

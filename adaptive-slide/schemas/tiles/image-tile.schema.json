@@ -1,0 +1,45 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-slide.dev/schemas/tiles/image-tile.schema.json",
+  "title": "Image Tile",
+  "description": "A tile for displaying images. Maps to Adaptive Cards Image element.",
+  "type": "object",
+  "required": ["type", "url"],
+  "allOf": [{ "$ref": "../tile.schema.json#/$defs/TileBase" }],
+  "properties": {
+    "type": { "const": "Tile.Image" },
+    "url": {
+      "type": "string",
+      "format": "uri",
+      "description": "URL of the image to display"
+    },
+    "altText": {
+      "type": "string",
+      "description": "Accessible alternative text"
+    },
+    "size": {
+      "type": "string",
+      "enum": ["auto", "stretch", "small", "medium", "large"],
+      "default": "auto"
+    },
+    "horizontalAlignment": {
+      "type": "string",
+      "enum": ["left", "center", "right"],
+      "default": "center"
+    },
+    "backgroundColor": {
+      "type": "string",
+      "description": "Background color behind the image"
+    },
+    "aspectRatio": {
+      "type": "string",
+      "pattern": "^\\d+:\\d+$",
+      "description": "Aspect ratio constraint (e.g. '16:9', '4:3')"
+    },
+    "caption": {
+      "type": "string",
+      "description": "Optional caption displayed below the image"
+    }
+  },
+  "unevaluatedProperties": false
+}

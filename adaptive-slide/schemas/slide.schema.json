@@ -1,0 +1,142 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://adaptive-slide.dev/schemas/slide.schema.json",
+  "title": "Adaptive Slide",
+  "description": "A single slide within a deck. Each slide is an Adaptive Card bucket that contains Adaptive Tiles arranged according to a layout mode.",
+  "type": "object",
+  "required": ["type", "body"],
+  "additionalProperties": false,
+  "properties": {
+    "type": {
+      "const": "AdaptiveSlide",
+      "description": "Discriminator identifying this as a slide"
+    },
+    "id": {
+      "type": "string",
+      "description": "Unique identifier for the slide within the deck"
+    },
+    "title": {
+      "type": "string",
+      "description": "Human-readable slide title (used in navigation/TOC)"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Speaker notes for this slide"
+    },
+    "layout": {
+      "$ref": "#/$defs/LayoutConfig",
+      "description": "Layout configuration for arranging tiles. Overrides deck defaults."
+    },
+    "background": {
+      "$ref": "#/$defs/Background",
+      "description": "Slide background configuration"
+    },
+    "transition": {
+      "type": "string",
+      "enum": ["none", "fade", "slide-left", "slide-right", "slide-up", "zoom"],
+      "description": "Entry transition for this slide. Overrides deck default."
+    },
+    "body": {
+      "type": "array",
+      "items": {
+        "$ref": "tile.schema.json"
+      },
+      "description": "The Adaptive Card bucket — an ordered array of Adaptive Tiles composing this slide"
+    },
+    "actions": {
+      "type": "array",
+      "items": {
+        "$ref": "#/$defs/Action"
+      },
+      "description": "Interactive actions attached to this slide (navigation, links, etc.)"
+    }
+  },
+  "$defs": {
+    "LayoutConfig": {
+      "type": "object",
+      "properties": {
+        "mode": {
+          "type": "string",
+          "enum": ["stack", "grid", "freeform"],
+          "default": "stack",
+          "description": "stack: vertical flow, grid: CSS-grid-like, freeform: absolute positioning"
+        },
+        "columns": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 12,
+          "description": "Number of columns for grid layout"
+        },
+        "gap": {
+          "type": "string",
+          "enum": ["none", "small", "default", "large"],
+          "default": "default"
+        },
+        "horizontalAlignment": {
+          "type": "string",
+          "enum": ["left", "center", "right", "stretch"],
+          "default": "stretch"
+        },
+        "verticalAlignment": {
+          "type": "string",
+          "enum": ["top", "center", "bottom"],
+          "default": "top"
+        }
+      },
+      "additionalProperties": false
+    },
+    "Background": {
+      "type": "object",
+      "properties": {
+        "color": { "type": "string" },
+        "image": {
+          "type": "object",
+          "properties": {
+            "url": { "type": "string", "format": "uri" },
+            "fillMode": {
+              "type": "string",
+              "enum": ["cover", "contain", "repeat", "stretch"],
+              "default": "cover"
+            },
+            "opacity": {
+              "type": "number",
+              "minimum": 0,
+              "maximum": 1,
+              "default": 1
+            }
+          },
+          "required": ["url"]
+        },
+        "gradient": {
+          "type": "object",
+          "properties": {
+            "type": { "type": "string", "enum": ["linear", "radial"] },
+            "colors": {
+              "type": "array",
+              "items": { "type": "string" },
+              "minItems": 2
+            },
+            "angle": { "type": "number", "default": 180 }
+          },
+          "required": ["type", "colors"]
+        }
+      },
+      "additionalProperties": false
+    },
+    "Action": {
+      "type": "object",
+      "required": ["type", "title"],
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["Action.OpenUrl", "Action.Submit", "Action.GoToSlide", "Action.NextSlide", "Action.PrevSlide"]
+        },
+        "title": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "targetSlideId": { "type": "string" },
+        "data": {}
+      },
+      "additionalProperties": true
+    }
+  }
+}

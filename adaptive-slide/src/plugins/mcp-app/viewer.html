@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Adaptive Slide Viewer</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --primary: #0078d4;
+    --accent: #50e6ff;
+    --bg: #ffffff;
+    --fg: #333333;
+    --surface: #f5f5f5;
+    --font: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  }
+
+  .dark {
+    --bg: #1a1a1a;
+    --fg: #e0e0e0;
+    --surface: #2d2d2d;
+  }
+
+  body {
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--fg);
+    width: 100%;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Toolbar */
+  .toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 6px 16px;
+    background: var(--surface);
+    border-bottom: 1px solid rgba(128,128,128,0.15);
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    z-index: 10;
+  }
+  .toolbar .title { font-weight: 600; }
+  .toolbar .nav {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .toolbar button {
+    background: var(--primary);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    padding: 4px 12px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: opacity 0.15s;
+  }
+  .toolbar button:hover { opacity: 0.85; }
+  .toolbar button:disabled { opacity: 0.4; cursor: default; }
+  .toolbar .counter { color: rgba(128,128,128,0.8); font-variant-numeric: tabular-nums; }
+
+  /* Slide area */
+  .slide-viewport {
+    flex: 1;
+    overflow: auto;
+    display: flex;
+    align-items: stretch;
+    justify-content: center;
+    position: relative;
+  }
+  .slide-viewport > .slide {
+    width: 100%;
+    max-width: 1200px;
+    transition: opacity 0.3s ease;
+  }
+  .slide-viewport > .slide.fade-in { animation: fadeIn 0.35s ease; }
+  @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Tile styling */
+  .tile { word-wrap: break-word; }
+  .tile-text a { color: var(--primary); text-decoration: underline; }
+  .tile-code pre { tab-size: 4; }
+  .tile-image img { display: block; }
+  .tile-container { overflow: hidden; }
+
+  /* Slide picker overlay */
+  .slide-picker {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.6);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .slide-picker.open { display: flex; }
+  .slide-picker-inner {
+    background: var(--bg);
+    border-radius: 8px;
+    padding: 16px;
+    max-width: 600px;
+    width: 90%;
+    max-height: 80vh;
+    overflow: auto;
+  }
+  .slide-picker-inner h3 { margin-bottom: 12px; }
+  .slide-picker-item {
+    padding: 8px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    margin-bottom: 4px;
+    transition: background 0.15s;
+  }
+  .slide-picker-item:hover { background: rgba(0,120,212,0.1); }
+  .slide-picker-item.active { background: var(--primary); color: white; }
+
+  /* Loading state */
+  .loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    font-size: 1.1rem;
+    color: rgba(128,128,128,0.6);
+  }
+
+  /* Notes panel */
+  .notes-panel {
+    display: none;
+    padding: 8px 16px;
+    background: var(--surface);
+    border-top: 1px solid rgba(128,128,128,0.15);
+    font-size: 0.8rem;
+    color: rgba(128,128,128,0.8);
+    max-height: 100px;
+    overflow: auto;
+    flex-shrink: 0;
+  }
+  .notes-panel.visible { display: block; }
+</style>
+</head>
+<body>
+  <div class="toolbar">
+    <span class="title" id="deck-title">Adaptive Slide</span>
+    <div class="nav">
+      <button id="btn-prev" disabled>◀ Prev</button>
+      <span class="counter" id="counter">–</span>
+      <button id="btn-next" disabled>Next ▶</button>
+      <button id="btn-picker" title="Slide picker">☰</button>
+    </div>
+  </div>
+
+  <div class="slide-viewport" id="viewport">
+    <div class="loading" id="loading">Waiting for deck data…</div>
+  </div>
+
+  <div class="notes-panel" id="notes"></div>
+
+  <div class="slide-picker" id="picker">
+    <div class="slide-picker-inner" id="picker-list">
+      <h3>Slides</h3>
+    </div>
+  </div>
+
+<script>
+// ── TRANSFORMER (inlined for self-contained bundle) ──
+const TRANSFORMER = (() => {
+  function esc(s) {
+    return s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+  function md(text) {
+    return esc(text)
+      .replace(/\*\*(.+?)\*\*/g,"<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g,"<em>$1</em>")
+      .replace(/`(.+?)`/g,"<code>$1</code>")
+      .replace(/\[(.+?)\]\((.+?)\)/g,'<a href="$2" target="_blank">$1</a>')
+      .replace(/\n- /g,"\n• ")
+      .replace(/\n/g,"<br>");
+  }
+  const SP = {none:"0",small:"4px",default:"8px",medium:"12px",large:"16px",extraLarge:"24px",padding:"16px"};
+  const GP = {none:"0",small:"4px",default:"8px",large:"16px"};
+  const PP = {none:"0",small:"8px",default:"16px",large:"32px"};
+  const SZ = {small:"0.85rem",default:"1rem",medium:"1.25rem",large:"1.75rem",extraLarge:"2.5rem"};
+  const WT = {lighter:"300",default:"400",bolder:"700"};
+
+  function colorVal(c, theme) {
+    const m = {default:theme?.darkMode?"#e0e0e0":"#333",dark:"#1a1a1a",light:"#fff",accent:theme?.accentColor||"#0078d4",good:"#107c10",warning:"#ff8c00",attention:"#d13438"};
+    return m[c||"default"]||m.default;
+  }
+
+  function gridSt(p){const a=[];if(p.column)a.push("grid-column:"+p.column+"/span "+(p.columnSpan||1));if(p.row)a.push("grid-row:"+p.row+"/span "+(p.rowSpan||1));return a.join(";")}
+  function freeSt(p){return "position:absolute;left:"+p.x+"%;top:"+p.y+"%;width:"+p.width+"%;height:"+p.height+"%"+(p.rotation?";transform:rotate("+p.rotation+"deg)":"")+(p.zIndex?";z-index:"+p.zIndex:"")}
+
+  function renderText(t, th) {
+    const fw = t.style==="heading"?"700":t.style==="subheading"?"600":WT[t.weight||"default"];
+    const fs = t.style==="heading"?SZ[t.size||"large"]:t.style==="subheading"?SZ[t.size||"medium"]:t.style==="caption"?SZ.small:SZ[t.size||"default"];
+    const c = colorVal(t.color, th);
+    const al = t.horizontalAlignment||"left";
+    const fn = t.fontType==="monospace"?"monospace":"inherit";
+    const ml = t.maxLines?`overflow:hidden;display:-webkit-box;-webkit-line-clamp:${t.maxLines};-webkit-box-orient:vertical;`:"";
+    const qs = t.style==="quote"?"border-left:4px solid rgba(128,128,128,0.4);padding-left:12px;font-style:italic;":"";
+    return `<div class="tile tile-text" style="font-size:${fs};font-weight:${fw};color:${c};text-align:${al};font-family:${fn};${ml}${qs}">${md(t.text)}</div>`;
+  }
+
+  function renderImage(t) {
+    const al = t.horizontalAlignment||"center";
+    const sm = {auto:"max-width:100%",stretch:"width:100%",small:"max-width:120px",medium:"max-width:300px",large:"max-width:500px"};
+    const ss = sm[t.size||"auto"];
+    const bg = t.backgroundColor?`background:${t.backgroundColor};`:"";
+    const cap = t.caption?`<figcaption style="text-align:center;font-size:0.85rem;color:#666;margin-top:4px;">${esc(t.caption)}</figcaption>`:"";
+    return `<figure class="tile tile-image" style="text-align:${al};margin:0;${bg}"><img src="${esc(t.url)}" alt="${esc(t.altText||"")}" style="${ss};height:auto;border-radius:4px;" />${cap}</figure>`;
+  }
+
+  function renderCode(t, th) {
+    const dk = t.theme==="dark"||(t.theme!=="light"&&th?.darkMode);
+    const bg = dk?"#1e1e1e":"#f5f5f5", fg = dk?"#d4d4d4":"#333";
+    const hdr = t.title?`<div style="padding:6px 12px;background:${dk?"#2d2d2d":"#e8e8e8"};font-size:0.8rem;color:${dk?"#aaa":"#666"};border-radius:6px 6px 0 0;">${esc(t.title)}${t.language?` <span style="opacity:0.6">· ${esc(t.language)}</span>`:""}</div>`:"";
+    const lines = t.code.split("\n"), start = t.startLineNumber||1, hl = new Set(t.highlightLines||[]);
+    const cl = lines.map((l,i) => {
+      const n = start+i, h = hl.has(n)?`background:${dk?"rgba(255,255,0,0.1)":"rgba(255,255,0,0.2)"};`:"";
+      const nm = t.showLineNumbers!==false?`<span style="color:${dk?"#666":"#999"};user-select:none;width:3em;display:inline-block;text-align:right;margin-right:12px;">${n}</span>`:"";
+      return `<div style="${h}padding:0 12px;">${nm}${esc(l)||" "}</div>`;
+    }).join("");
+    const mh = t.maxHeight?`max-height:${t.maxHeight};overflow:auto;`:"";
+    return `<div class="tile tile-code">${hdr}<pre style="margin:0;padding:8px 0;background:${bg};color:${fg};font-family:'Fira Code',Consolas,monospace;font-size:0.85rem;border-radius:${t.title?"0 0 6px 6px":"6px"};overflow-x:auto;${mh}">${cl}</pre></div>`;
+  }
+
+  function renderChart(t, th) {
+    const colors = t.colors||["#0078d4","#50e6ff","#ff8c00","#107c10","#d13438","#5c2d91"];
+    const max = Math.max(...t.data.datasets.flatMap(d=>d.values),1);
+    const title = t.title?`<div style="font-weight:600;margin-bottom:8px;">${esc(t.title)}</div>`:"";
+    if (t.chartType==="bar") {
+      const bg = t.data.labels.map((lb,i)=>{
+        const bars = t.data.datasets.map((ds,di)=>{const v=ds.values[i]||0;const p=(v/max)*100;const c=ds.color||colors[di%colors.length];return `<div style="height:${p}%;background:${c};flex:1;border-radius:3px 3px 0 0;min-width:16px;" title="${(ds.label||"")}: ${v}"></div>`;}).join("");
+        return `<div style="display:flex;flex-direction:column;align-items:stretch;gap:2px;flex:1;"><div style="display:flex;gap:2px;align-items:flex-end;height:120px;">${bars}</div><div style="text-align:center;font-size:0.75rem;color:#888;margin-top:4px;">${esc(lb)}</div></div>`;
+      }).join("");
+      const leg = t.showLegend!==false?renderLeg(t.data.datasets,colors):"";
+      return `<div class="tile tile-chart">${title}<div style="display:flex;gap:8px;align-items:flex-end;">${bg}</div>${leg}</div>`;
+    }
+    if (t.chartType==="pie"||t.chartType==="donut") {
+      const tot = t.data.datasets[0]?.values.reduce((a,b)=>a+b,0)||1;
+      let cum=0;const sl=t.data.datasets[0]?.values.map((v,i)=>{const p=v/tot;const s=cum*360;cum+=p;const e=cum*360;return `${colors[i%colors.length]} ${s}deg ${e}deg`;});
+      const hole = t.chartType==="donut"?", radial-gradient(circle, var(--bg) 40%, transparent 40%)":"";
+      const leg = t.showLegend!==false?renderPieLeg(t.data.labels,colors):"";
+      return `<div class="tile tile-chart">${title}<div style="width:150px;height:150px;border-radius:50%;background:conic-gradient(${(sl||[]).join(", ")})${hole};margin:0 auto;"></div>${leg}</div>`;
+    }
+    const rows = t.data.labels.map((lb,i)=>`<tr><td style="padding:4px 8px;">${esc(lb)}</td>${t.data.datasets.map(ds=>`<td style="padding:4px 8px;">${ds.values[i]||0}</td>`).join("")}</tr>`).join("");
+    return `<div class="tile tile-chart">${title}<table style="width:100%;border-collapse:collapse;font-size:0.85rem;"><tr><th></th>${t.data.datasets.map(ds=>`<th style="padding:4px 8px;">${esc(ds.label||"")}</th>`).join("")}</tr>${rows}</table></div>`;
+  }
+
+  function renderLeg(ds,c){return `<div style="margin-top:8px;">${ds.map((d,i)=>`<span style="display:inline-flex;align-items:center;gap:4px;margin-right:12px;"><span style="width:10px;height:10px;background:${d.color||c[i%c.length]};border-radius:2px;"></span><span style="font-size:0.75rem;">${esc(d.label||"")}</span></span>`).join("")}</div>`;}
+  function renderPieLeg(ls,c){return `<div style="margin-top:8px;text-align:center;">${ls.map((l,i)=>`<span style="display:inline-flex;align-items:center;gap:4px;margin-right:12px;"><span style="width:10px;height:10px;background:${c[i%c.length]};border-radius:2px;"></span><span style="font-size:0.75rem;">${esc(l)}</span></span>`).join("")}</div>`;}
+
+  function renderMedia(t) {
+    const src = t.sources[0]; if(!src) return `<div class="tile tile-media" style="color:#999;">No media</div>`;
+    const isA = src.mimeType?.startsWith("audio/")||false;
+    const at = [t.autoplay?"autoplay":"",t.loop?"loop":"",t.muted?"muted":"","controls"].filter(Boolean).join(" ");
+    const srcs = t.sources.map(s=>`<source src="${esc(s.url)}"${s.mimeType?` type="${esc(s.mimeType)}"`:""}>`).join("");
+    if(isA) return `<div class="tile tile-media"><audio ${at}>${srcs}</audio></div>`;
+    const poster = t.poster?`poster="${esc(t.poster)}"`:"";
+    return `<div class="tile tile-media" style="aspect-ratio:${(t.aspectRatio||"16:9").replace(":","/")};"><video ${at} ${poster} style="width:100%;height:100%;object-fit:contain;border-radius:4px;">${srcs}</video></div>`;
+  }
+
+  function renderContainer(t, th) {
+    const sm = {default:"",emphasis:"background:rgba(128,128,128,0.08);",good:"background:rgba(16,124,16,0.08);border-left:3px solid #107c10;",attention:"background:rgba(209,52,56,0.08);border-left:3px solid #d13438;",warning:"background:rgba(255,140,0,0.08);border-left:3px solid #ff8c00;",accent:`background:rgba(0,120,212,0.08);border-left:3px solid ${th?.accentColor||"#0078d4"};`};
+    const cs = sm[t.style||"default"]||"";
+    const ls = t.layout==="row"?"display:flex;gap:16px;":t.layout==="wrap"?"display:flex;flex-wrap:wrap;gap:16px;":"display:flex;flex-direction:column;gap:8px;";
+    const va = {top:"flex-start",center:"center",bottom:"flex-end"};
+    const bg = t.backgroundImage?`background-image:url('${esc(t.backgroundImage.url)}');background-size:${t.backgroundImage.fillMode||"cover"};background-position:center;`:"";
+    const mh = t.minHeight?`min-height:${t.minHeight};`:"";
+    return `<div class="tile tile-container" style="padding:12px;border-radius:6px;${cs}${ls}align-items:${va[t.verticalContentAlignment||"top"]};${bg}${mh}">${t.items.map(i=>renderTile(i,th)).join("")}</div>`;
+  }
+
+  function renderTile(tile, theme) {
+    if(tile.isVisible===false) return "";
+    const sp = tile.spacing?`margin-top:${SP[tile.spacing]||"8px"};`:"";
+    const sep = tile.separator?`<hr style="border:none;border-top:1px solid rgba(128,128,128,0.2);margin:8px 0;">`:""
+    const ps = tile.gridPosition?gridSt(tile.gridPosition):tile.freeformPosition?freeSt(tile.freeformPosition):"";
+    const ws = [sp,ps].filter(Boolean).join(" ");
+    let inner;
+    switch(tile.type){
+      case "Tile.Text": inner=renderText(tile,theme);break;
+      case "Tile.Image": inner=renderImage(tile);break;
+      case "Tile.Code": inner=renderCode(tile,theme);break;
+      case "Tile.Chart": inner=renderChart(tile,theme);break;
+      case "Tile.Media": inner=renderMedia(tile);break;
+      case "Tile.Container": inner=renderContainer(tile,theme);break;
+      default: inner=`<div style="color:#999;">Unknown tile: ${esc(tile.type)}</div>`;
+    }
+    return `${sep}<div style="${ws}">${inner}</div>`;
+  }
+
+  function renderBg(bg) {
+    if(!bg) return "";
+    if(bg.gradient){const{type:t,colors:c,angle:a}=bg.gradient;return t==="radial"?`background:radial-gradient(${c.join(",")});`:`background:linear-gradient(${a||180}deg,${c.join(",")});`;}
+    if(bg.image) return `background:url('${esc(bg.image.url)}') center/${bg.image.fillMode||"cover"} no-repeat;${bg.image.opacity!=null?"opacity:"+bg.image.opacity+";":""}`;
+    if(bg.color) return `background:${bg.color};`;
+    return "";
+  }
+
+  function renderSlide(slide, theme, defaults) {
+    const layout = slide.layout||{mode:defaults?.layout||"stack"};
+    const pad = PP[defaults?.padding||"default"];
+    const bg = renderBg(slide.background);
+    let ls;
+    switch(layout.mode){
+      case "grid": ls=`display:grid;grid-template-columns:repeat(${layout.columns||2},1fr);gap:${GP[layout.gap||"default"]};`;break;
+      case "freeform": ls="position:relative;width:100%;height:100%;";break;
+      default: ls=`display:flex;flex-direction:column;gap:${GP[layout.gap||"default"]};`;
+    }
+    const hm = {left:"flex-start",center:"center",right:"flex-end",stretch:"stretch"};
+    const vm = {top:"flex-start",center:"center",bottom:"flex-end"};
+    const al = layout.mode==="stack"?`align-items:${hm[layout.horizontalAlignment||"stretch"]};justify-content:${vm[layout.verticalAlignment||"top"]};`:"";
+    return `<div class="slide" style="${bg}padding:${pad};${ls}${al}min-height:100%;box-sizing:border-box;">${slide.body.map(t=>renderTile(t,theme)).join("\n")}</div>`;
+  }
+
+  return { renderSlide, renderTile };
+})();
+
+// ── MCP APP PROTOCOL (implements postMessage handshake directly) ──
+const MCP_APP = (() => {
+  let connected = false;
+  let onToolResult = null;
+  let requestId = 0;
+  const pending = new Map();
+
+  function send(msg) {
+    window.parent.postMessage(msg, "*");
+  }
+
+  function sendRequest(method, params) {
+    const id = ++requestId;
+    return new Promise((resolve, reject) => {
+      pending.set(id, { resolve, reject });
+      send({ jsonrpc: "2.0", id, method, params });
+    });
+  }
+
+  window.addEventListener("message", (event) => {
+    const msg = event.data;
+    if (!msg || typeof msg !== "object") return;
+
+    // Handle JSON-RPC responses
+    if (msg.id && pending.has(msg.id)) {
+      const { resolve, reject } = pending.get(msg.id);
+      pending.delete(msg.id);
+      if (msg.error) reject(msg.error);
+      else resolve(msg.result);
+      return;
+    }
+
+    // Handle JSON-RPC requests/notifications from host
+    if (msg.method) {
+      switch (msg.method) {
+        case "ui/initialize":
+          connected = true;
+          // Respond to initialize
+          if (msg.id) {
+            send({ jsonrpc: "2.0", id: msg.id, result: { name: "Adaptive Slide Viewer", version: "1.0.0" } });
+          }
+          break;
+        case "ui/toolResult":
+          if (onToolResult) onToolResult(msg.params);
+          if (msg.id) send({ jsonrpc: "2.0", id: msg.id, result: {} });
+          break;
+        case "notifications/initialized":
+          break;
+      }
+    }
+  });
+
+  // Announce presence to host
+  send({ jsonrpc: "2.0", method: "ui/ready", params: {} });
+
+  return {
+    set ontoolresult(fn) { onToolResult = fn; },
+    callServerTool(name, args) { return sendRequest("tools/call", { name, arguments: args }); },
+  };
+})();
+
+// ── VIEWER APP ──
+(() => {
+  let deck = null;
+  let currentSlide = 0;
+  const viewport = document.getElementById("viewport");
+  const loading = document.getElementById("loading");
+  const counter = document.getElementById("counter");
+  const btnPrev = document.getElementById("btn-prev");
+  const btnNext = document.getElementById("btn-next");
+  const btnPicker = document.getElementById("btn-picker");
+  const picker = document.getElementById("picker");
+  const pickerList = document.getElementById("picker-list");
+  const titleEl = document.getElementById("deck-title");
+  const notesEl = document.getElementById("notes");
+
+  function applyTheme(theme) {
+    if (!theme) return;
+    const root = document.documentElement;
+    if (theme.primaryColor) root.style.setProperty("--primary", theme.primaryColor);
+    if (theme.accentColor) root.style.setProperty("--accent", theme.accentColor);
+    if (theme.backgroundColor) root.style.setProperty("--bg", theme.backgroundColor);
+    if (theme.fontFamily) root.style.setProperty("--font", theme.fontFamily);
+    if (theme.darkMode) document.body.classList.add("dark");
+    else document.body.classList.remove("dark");
+  }
+
+  function showSlide(index) {
+    if (!deck || index < 0 || index >= deck.slides.length) return;
+    currentSlide = index;
+    const slide = deck.slides[index];
+    const html = TRANSFORMER.renderSlide(slide, deck.theme, deck.defaults);
+
+    loading.style.display = "none";
+    // Clear previous slides
+    viewport.querySelectorAll(".slide").forEach(el => el.remove());
+    const container = document.createElement("div");
+    container.innerHTML = html;
+    const slideEl = container.firstElementChild;
+    slideEl.classList.add("fade-in");
+    viewport.appendChild(slideEl);
+
+    // Update controls
+    counter.textContent = `${index + 1} / ${deck.slides.length}`;
+    btnPrev.disabled = index === 0;
+    btnNext.disabled = index === deck.slides.length - 1;
+
+    // Notes
+    if (slide.notes) {
+      notesEl.textContent = slide.notes;
+      notesEl.classList.add("visible");
+    } else {
+      notesEl.classList.remove("visible");
+    }
+  }
+
+  function buildPicker() {
+    // Clear previous items (keep the h3)
+    pickerList.querySelectorAll(".slide-picker-item").forEach(el => el.remove());
+    deck.slides.forEach((slide, i) => {
+      const item = document.createElement("div");
+      item.className = "slide-picker-item" + (i === currentSlide ? " active" : "");
+      item.textContent = `${i + 1}. ${slide.title || slide.id || "Untitled"}`;
+      item.addEventListener("click", () => {
+        showSlide(i);
+        picker.classList.remove("open");
+        buildPicker();
+      });
+      pickerList.appendChild(item);
+    });
+  }
+
+  function loadDeck(deckData) {
+    deck = deckData;
+    if (deck.metadata?.title) titleEl.textContent = deck.metadata.title;
+    applyTheme(deck.theme);
+    buildPicker();
+    showSlide(0);
+  }
+
+  // Navigation
+  btnPrev.addEventListener("click", () => showSlide(currentSlide - 1));
+  btnNext.addEventListener("click", () => showSlide(currentSlide + 1));
+  btnPicker.addEventListener("click", () => { buildPicker(); picker.classList.toggle("open"); });
+  picker.addEventListener("click", (e) => { if (e.target === picker) picker.classList.remove("open"); });
+
+  // Keyboard navigation
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "ArrowRight" || e.key === " ") { e.preventDefault(); showSlide(currentSlide + 1); }
+    else if (e.key === "ArrowLeft") { e.preventDefault(); showSlide(currentSlide - 1); }
+    else if (e.key === "Home") { e.preventDefault(); showSlide(0); }
+    else if (e.key === "End" && deck) { e.preventDefault(); showSlide(deck.slides.length - 1); }
+    else if (e.key === "Escape") { picker.classList.remove("open"); }
+  });
+
+  // Receive deck from MCP App protocol
+  MCP_APP.ontoolresult = (result) => {
+    try {
+      // Tool result can come as text content or structured
+      if (result?.content) {
+        const textContent = result.content.find(c => c.type === "text");
+        if (textContent) {
+          const parsed = JSON.parse(textContent.text);
+          loadDeck(parsed);
+          return;
+        }
+      }
+      // Direct structured content
+      if (result?.structuredContent) {
+        loadDeck(result.structuredContent);
+        return;
+      }
+      // If result itself is a deck
+      if (result?.type === "AdaptiveDeck") {
+        loadDeck(result);
+      }
+    } catch (err) {
+      loading.textContent = "Error loading deck: " + err.message;
+    }
+  };
+
+  // Also support direct postMessage deck loading (non-MCP hosts)
+  window.addEventListener("message", (event) => {
+    const data = event.data;
+    if (data?.type === "AdaptiveDeck") {
+      loadDeck(data);
+    }
+  });
+
+  // If deck was embedded in the page as a global
+  if (window.__ADAPTIVE_SLIDE_DECK__) {
+    loadDeck(window.__ADAPTIVE_SLIDE_DECK__);
+  }
+})();
+</script>
+</body>
+</html>
