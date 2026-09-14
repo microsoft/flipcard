@@ -1,0 +1,20 @@
+<!DOCTYPE html><html><head><title>AC Test</title>
+<script src="https://unpkg.com/adaptivecards@3.0.6/dist/adaptivecards.min.js"></script>
+<style>body{background:#222;padding:20px;color:white;}</style>
+</head><body>
+<div id="r"></div><p id="status"></p>
+<script>
+const theme = {backgroundColor:"#1e1b4b",accentColor:"#a78bfa"};
+function lh(hex,a){const h=hex.replace('#','');const r=parseInt(h.slice(0,2),16),g=parseInt(h.slice(2,4),16),b=parseInt(h.slice(4,6),16);return '#'+[r,g,b].map(c=>Math.min(255,Math.round(c+(255-c)*a)).toString(16).padStart(2,'0')).join('');}
+const bg=theme.backgroundColor,acc=theme.accentColor,emph=lh(bg,0.12);
+const bf={default:{default:"#ffffff",subtle:"#ffffffbb"},dark:{default:"#ffffff",subtle:"#ffffffbb"},light:{default:"#ffffff",subtle:"#ffffffee"},accent:{default:acc,subtle:acc},good:{default:"#4ade80",subtle:"#4ade80cc"},warning:{default:"#fbbf24",subtle:"#fbbf24cc"},attention:{default:"#f87171",subtle:"#f87171cc"}};
+const wf={default:{default:"#ffffff",subtle:"#ffffffdd"},dark:{default:"#ffffff",subtle:"#ffffffdd"},light:{default:"#ffffff",subtle:"#ffffffee"}};
+const hc={supportsInteractivity:false,containerStyles:{default:{backgroundColor:bg,foregroundColors:bf},emphasis:{backgroundColor:emph,foregroundColors:bf},accent:{backgroundColor:acc,foregroundColors:wf},good:{backgroundColor:"#16a34a",foregroundColors:wf},attention:{backgroundColor:"#dc2626",foregroundColors:wf},warning:{backgroundColor:"#d97706",foregroundColors:wf}}};
+const payload={"type":"AdaptiveCard","version":"1.6","body":[{"type":"Container","style":"default","items":[{"type":"TextBlock","text":"HR Training","color":"Light","weight":"Bolder","size":"Large"},{"type":"TextBlock","text":"Week 4 of 12 - On Track","color":"Light","isSubtle":true}]},{"type":"Container","style":"accent","items":[{"type":"TextBlock","text":"87% completion rate","color":"Light","weight":"Bolder"}]}]};
+const card=new AdaptiveCards.AdaptiveCard();
+card.hostConfig=new AdaptiveCards.HostConfig(hc);
+card.parse(payload);
+const rendered=card.render();
+document.getElementById('r').appendChild(rendered);
+document.getElementById('status').textContent='BG: '+window.getComputedStyle(rendered).backgroundColor;
+</script></body></html>

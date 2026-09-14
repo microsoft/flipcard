@@ -1,6 +1,7 @@
 import { FLIPCARD_SCHEMA_URL } from '@microsoft/flipcard-core';
 import type { FlipCardAssetCategory, FlipCardAssetEntry } from './types';
 import { viewportFlipCardAssets } from './assets-viewport';
+import { slideFlipCardAssets } from './assets-slides.generated';
 
 export const flipCardCategoryLabels: Record<FlipCardAssetCategory, string> = {
   kpi: 'KPI',
@@ -16,6 +17,7 @@ export const flipCardCategoryLabels: Record<FlipCardAssetCategory, string> = {
   pattern: 'Pattern',
   tile: 'Tile',
   portfolio: 'Portfolio',
+  slide: 'Adaptive Slide',
 };
 
 export const flipCardAssetLibrary: readonly FlipCardAssetEntry[] = [
@@ -475,6 +477,7 @@ export const flipCardAssetLibrary: readonly FlipCardAssetEntry[] = [
     }
   },
   ...viewportFlipCardAssets,
+  ...slideFlipCardAssets,
 ];
 
 export function getFlipCardAssetById(id: string): FlipCardAssetEntry | undefined {
@@ -502,6 +505,7 @@ export function groupFlipCardAssetsByCategory(
     pattern: [],
     tile: [],
     portfolio: [],
+    slide: [],
   };
 
   for (const asset of assets) {
