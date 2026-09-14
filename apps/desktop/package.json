@@ -12,7 +12,7 @@
     "gen:icons": "node ./scripts/gen-placeholder-icons.mjs"
   },
   "dependencies": {
-    "@tauri-apps/api": "^2.11.0"
+    "@tauri-apps/api": "^2.11.1"
   },
   "devDependencies": {
     "@tauri-apps/cli": "^2.1.0",
