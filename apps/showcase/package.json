@@ -16,6 +16,6 @@
     "@microsoft/flipcard-react": "0.1.0",
     "@microsoft/flipcard-themes": "0.1.0",
     "react": "^19.3.0",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.3.0"
   }
 }
