@@ -36,7 +36,7 @@ jobs:
           cache: 'npm'
 
       - name: Setup Rust (stable)
-        uses: dtolnay/rust-toolchain@stable
+        uses: dtolnay/rust-toolchain@7e38f4b43b4db5c8dd498af069a4f6196df1d067 # v1
 
       - name: Cache Rust
         uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2.9.2
@@ -71,7 +71,7 @@ jobs:
 
       - name: Upload bundle artifacts
 
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
 
         with:
           name: flipcard-desktop-windows
@@ -81,7 +81,7 @@ jobs:
       - name: Create GitHub Release
         if: startsWith(github.ref, 'refs/tags/v')
 
-        uses: softprops/action-gh-release@v3
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
 
         with:
           files: artifacts/*
