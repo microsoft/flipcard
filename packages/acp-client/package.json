@@ -1,0 +1,34 @@
+{
+  "name": "@microsoft/flipcard-acp",
+  "version": "0.1.0",
+  "description": "Streaming ACP v1 agent client for FlipCard hosts",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsup src/index.ts --format esm --clean --external @agentclientprotocol/sdk && tsc -p tsconfig.build.json",
+    "dev": "tsup src/index.ts --format esm --watch",
+    "dev:types": "tsc -p tsconfig.build.json --watch",
+    "test": "vitest run",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@agentclientprotocol/sdk": "2.0.2"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT",
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

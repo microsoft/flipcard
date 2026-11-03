@@ -1,0 +1,10 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "flipcard",
+  "version": "0.1.0",
+  "description": "Create, validate, and preview schema-driven Flipcards through MCP.",
+  "homepage": "https://microsoft.github.io/flipcard/",
+  "repository": "https://github.com/microsoft/flipcard",
+  "license": "MIT",
+  "keywords": ["flipcard", "adaptive-cards", "mcp", "mcp-apps"]
+}

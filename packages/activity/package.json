@@ -1,0 +1,37 @@
+{
+  "name": "@microsoft/flipcard-activity",
+  "version": "0.1.0",
+  "description": "Microsoft 365 Agents Activity Protocol envelope and Adaptive Card adapters for FlipCard",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format esm,cjs --clean && tsc -p tsconfig.build.json",
+    "dev": "tsup src/index.ts --format esm,cjs --watch",
+    "test": "vitest run --dir src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@microsoft/flipcard-core": "0.1.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/microsoft/flipcard.git",
+    "directory": "packages/activity"
+  }
+}
