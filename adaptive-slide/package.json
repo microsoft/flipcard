@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "tsc && npm run copy-assets",
-    "copy-assets": "cp src/plugins/mcp-app/viewer.html dist/plugins/mcp-app/viewer.html",
+    "copy-assets": "node -e \"require('node:fs').copyFileSync('src/plugins/mcp-app/viewer.html', 'dist/plugins/mcp-app/viewer.html')\"",
     "validate": "node scripts/validate.js",
     "test": "node --test tests/*.test.js",
     "lint": "tsc --noEmit",
@@ -29,18 +29,23 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.32.0",
-    "cors": "^2.8.5",
-    "express": "^4.21.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
+    "cors": "^2.8.6",
+    "express": "^5.3.0",
     "zod": "^4.6.7"
   },
+  "overrides": {
+    "@modelcontextprotocol/sdk": {
+      "@hono/node-server": "2.1.5"
+    }
+  },
   "devDependencies": {
-    "@types/cors": "^2.8.17",
-    "@types/express": "^5.0.0",
-    "@types/node": "^22.0.0",
-    "ajv": "^8.18.0",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/node": "^26.6.5",
+    "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",
-    "tsx": "^4.22.4",
-    "typescript": "^5.6.0"
+    "tsx": "^4.23.15",
+    "typescript": "^7.0.2"
   }
 }

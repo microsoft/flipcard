@@ -1,0 +1,12 @@
+{
+  "name": "@microsoft/flipcard-lint",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": "./index.js",
+  "dependencies": {
+    "@typescript-eslint/eslint-plugin": "^8.72.1",
+    "@typescript-eslint/parser": "^8.72.1",
+    "typescript": "^6.0.3"
+  }
+}

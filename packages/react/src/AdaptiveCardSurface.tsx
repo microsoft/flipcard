@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import * as AdaptiveCards from 'adaptivecards';
 
 export interface AdaptiveCardSurfaceProps {
@@ -7,12 +7,11 @@ export interface AdaptiveCardSurfaceProps {
 }
 
 export function AdaptiveCardSurface({ payload, hostConfig }: AdaptiveCardSurfaceProps) {
-  const ref = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    const host = ref.current;
+  const renderCard = useCallback((host: HTMLDivElement | null) => {
     if (!host) return;
+    host.replaceChildren();
     try {
       const card = new AdaptiveCards.AdaptiveCard();
       if (hostConfig) {
@@ -27,11 +26,8 @@ export function AdaptiveCardSurface({ payload, hostConfig }: AdaptiveCardSurface
         setError('Adaptive Card returned no content.');
       }
     } catch (err) {
-      setError((err as Error).message);
+      setError(err instanceof Error ? err.message : String(err));
     }
-    return () => {
-      host.replaceChildren();
-    };
   }, [payload, hostConfig]);
 
   return (
@@ -41,7 +37,7 @@ export function AdaptiveCardSurface({ payload, hostConfig }: AdaptiveCardSurface
       onKeyDown={(event) => event.stopPropagation()}
       role="presentation"
     >
-      <div ref={ref} />
+      <div ref={renderCard} />
       {error ? <p className="fc-asset-adaptive-card-error">{error}</p> : null}
     </div>
   );
