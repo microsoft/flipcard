@@ -60,22 +60,26 @@ describe("MCP Apps viewer lifecycle", () => {
         },
       };
       for (const foreignSource of [null, new Window()]) {
-        dom.dispatchEvent(new dom.MessageEvent("message", {
-          data: dom.JSON.parse(JSON.stringify(spoofed)),
-          source: foreignSource,
-          origin: "https://untrusted.example",
-        }));
-        await tick(0);
-        assert.notEqual(dom.document.getElementById("deck-title").textContent, "Untrusted");
+        for (const origin of ["https://untrusted.example", "null", dom.location.origin]) {
+          dom.dispatchEvent(new dom.MessageEvent("message", {
+            data: dom.JSON.parse(JSON.stringify(spoofed)),
+            source: foreignSource,
+            origin,
+          }));
+          await tick(0);
+          assert.notEqual(dom.document.getElementById("deck-title").textContent, "Untrusted");
+        }
         if (foreignSource) await foreignSource.happyDOM.close();
       }
-      dom.dispatchEvent(new dom.MessageEvent("message", {
-        data: { type: "deck", deck: spoofed.params.structuredContent },
-        source,
-        origin: "null",
-      }));
-      await tick(0);
-      assert.notEqual(dom.document.getElementById("deck-title").textContent, "Untrusted");
+      for (const data of [
+        { type: "deck", deck: spoofed.params.structuredContent },
+        spoofed.params.structuredContent,
+        { ...spoofed, method: "ui/toolResult" },
+      ]) {
+        dom.dispatchEvent(new dom.MessageEvent("message", { data, source, origin: "null" }));
+        await tick(0);
+        assert.notEqual(dom.document.getElementById("deck-title").textContent, "Untrusted");
+      }
       await bridge.sendToolResult({ content: [], structuredContent: {
         type: "AdaptiveDeck", title: "Bundled slide viewer",
         slides: [{ title: "First" }, { title: "Second" }],
