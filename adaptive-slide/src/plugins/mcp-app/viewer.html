@@ -329,6 +329,7 @@ const MCP_APP = (() => {
   let onToolResult = null;
   let requestId = 0;
   const pending = new Map();
+  const TRUSTED_ORIGINS = new Set([window.location.origin, "null"]);
 
   function send(msg) {
     window.parent.postMessage(msg, "*");
@@ -343,6 +344,8 @@ const MCP_APP = (() => {
   }
 
   window.addEventListener("message", (event) => {
+    if (!TRUSTED_ORIGINS.has(event.origin)) return;
+
     const msg = event.data;
     if (!msg || typeof msg !== "object") return;
 
