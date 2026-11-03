@@ -6,11 +6,17 @@ on:
   push:
     paths:
       - .github/workflows/copilot-setup-steps.yml
+      - '**/package-lock.json'
+  pull_request:
+    paths:
+      - .github/workflows/copilot-setup-steps.yml
+      - '**/package-lock.json'
 
 jobs:
   # The job MUST be called 'copilot-setup-steps' to be recognized by GitHub Copilot Agent
   copilot-setup-steps:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     # Set minimal permissions for setup steps
     # Copilot Agent receives its own token with appropriate permissions
@@ -20,6 +26,25 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            docs/package-lock.json
+            adaptive-slide/package-lock.json
+      - name: Install monorepo dependencies
+        run: npm ci
+      - name: Build workspace libraries
+        run: npm run build:libs
+      - name: Install documentation dependencies
+        working-directory: docs
+        run: npm ci
+      - name: Install Adaptive Slide dependencies
+        working-directory: adaptive-slide
+        run: npm ci
       - name: Install gh-aw extension
         uses: github/gh-aw-actions/setup-cli@239aec45b78c8799417efdd5bc6d8cc036629ec1 # v0.71.1
         with:

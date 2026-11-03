@@ -1,0 +1,29 @@
+{
+  "name": "Flipcard",
+  "image": "mcr.microsoft.com/devcontainers/typescript-node:1-24-bookworm",
+  "postCreateCommand": "npm ci && npm run build:libs && npm --prefix docs ci && npm --prefix adaptive-slide ci",
+  "forwardPorts": [5173, 3000, 3001],
+  "portsAttributes": {
+    "5173": {
+      "label": "FlipDeck",
+      "onAutoForward": "notify"
+    },
+    "3000": {
+      "label": "Documentation",
+      "onAutoForward": "notify"
+    },
+    "3001": {
+      "label": "Adaptive Slide MCP",
+      "onAutoForward": "notify"
+    }
+  },
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "GitHub.copilot"
+      ]
+    }
+  }
+}

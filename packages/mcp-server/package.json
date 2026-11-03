@@ -14,14 +14,15 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/cli.ts --format esm --dts --clean --external @microsoft/flipcard-core --external @modelcontextprotocol/sdk",
-    "dev": "tsup src/index.ts src/cli.ts --format esm --dts --watch",
+    "build": "tsup src/index.ts src/cli.ts --format esm --clean --external @microsoft/flipcard-core --external @modelcontextprotocol/sdk && tsc -p tsconfig.build.json",
+    "dev": "tsup src/index.ts src/cli.ts --format esm --watch",
+    "dev:types": "tsc -p tsconfig.build.json --watch",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "start": "node dist/cli.js"
   },
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.32.0",
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "@microsoft/flipcard-core": "0.1.0",
     "zod": "^4.6.7"
   },

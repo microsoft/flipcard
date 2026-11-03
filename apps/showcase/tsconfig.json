@@ -1,7 +1,6 @@
 {
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
-    "baseUrl": ".",
     "types": ["vite/client"],
     "paths": {
       "@microsoft/flipcard": ["../../packages/vanilla/src/index.ts"],

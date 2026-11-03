@@ -6,11 +6,13 @@
     "declaration": true,
     "declarationMap": false,
     "noEmit": false,
-    "baseUrl": ".",
+    "outDir": "./dist",
+    "rootDir": "./src",
     "paths": {
       "@microsoft/flipcard-core": ["./src/flipcard-core-shim.d.ts"]
     }
   },
   "references": [],
+  "include": ["src/**/*.ts"],
   "exclude": ["src/**/*.test.ts"]
 }
