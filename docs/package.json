@@ -3,6 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
+    "postinstall": "patch-package --error-on-fail",
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
     "build": "docusaurus build",
@@ -20,6 +21,7 @@
     "@docusaurus/preset-classic": "3.10.2",
     "@mdx-js/react": "^3.1.1",
     "clsx": "^2.1.1",
+    "patch-package": "8.0.1",
     "prism-react-renderer": "^2.4.1",
     "react": "^19.3.1",
     "react-dom": "^19.3.1"
@@ -47,6 +49,9 @@
     "node": ">=20.0"
   },
   "overrides": {
+    "serve-handler": {
+      "minimatch": "11.0.1"
+    },
     "uuid": "^14.0.0",
     "serialize-javascript": "^7.1.4",
     "@docusaurus/core@3.10.2": {
