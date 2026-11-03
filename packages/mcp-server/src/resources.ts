@@ -1,4 +1,4 @@
-import { ResourceTemplate } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { ResourceTemplate } from '@modelcontextprotocol/server';
 import { flipCardManifestSchema } from '@microsoft/flipcard-core';
 import { CATEGORY_DESCRIPTIONS, CATEGORY_VALUES, createStarterManifest, type FlipCardCategory } from './tools.js';
 
@@ -12,7 +12,7 @@ export interface ResourceResponse {
 }
 
 export type ResourceRegistrar = Pick<
-  import('@modelcontextprotocol/sdk/server/mcp.js').McpServer,
+  import('@modelcontextprotocol/server').McpServer,
   'registerResource'
 >;
 

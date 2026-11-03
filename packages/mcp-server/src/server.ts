@@ -1,4 +1,5 @@
-import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import { McpServer } from '@modelcontextprotocol/server';
+import { registerFlipCardApp } from './app.js';
 import { registerFlipCardResources } from './resources.js';
 import { registerFlipCardTools } from './tools.js';
 
@@ -18,6 +19,7 @@ export function createFlipCardServer(options: CreateFlipCardServerOptions = {}):
 
   registerFlipCardTools(server);
   registerFlipCardResources(server);
+  registerFlipCardApp(server);
 
   return server;
 }

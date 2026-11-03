@@ -1,3 +1,4 @@
+// @vitest-environment node
 import { describe, expect, it } from 'vitest';
 import { FLIPCARD_SCHEMA_URL, type FlipCardManifest } from '@microsoft/flipcard-core';
 import {
