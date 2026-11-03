@@ -1,0 +1,12 @@
+Upstream: @svgr/plugin-svgo 8.1.0
+Repository: https://github.com/gregberge/svgr/tree/main/packages/plugin-svgo
+Upstream commit: 772592e042be5063e782bfb8711d024b2fefc6b8
+License: MIT; original LICENSE is retained.
+
+The dist implementation, source map, and declarations are unchanged from the
+published package. This local package has a distinct identity and removes only
+the unused deepmerge dependency from the installation graph. No merge algorithm
+is substituted and no SVGO transformation is disabled.
+
+Regenerate both lockfiles and run the SVG regression test and documentation
+build when replacing this vendor package with an upstream release.
