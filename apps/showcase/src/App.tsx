@@ -6,6 +6,7 @@ import {
   type FlipCardAssetCategory,
 } from '@microsoft/flipcard';
 import { FlipCardCatalog } from '@microsoft/flipcard-react';
+import { useStockQuoteAssets } from './use-stock-quote';
 
 type ThemeId = 'light' | 'dark' | 'midnight-sapphire';
 
@@ -18,6 +19,7 @@ const THEMES: Array<{ id: ThemeId; label: string }> = [
 export function App() {
   const [theme, setTheme] = useState<ThemeId>('light');
   const [activeCategory, setActiveCategory] = useState<FlipCardAssetCategory | 'all'>('all');
+  const refreshedAssets = useStockQuoteAssets(flipCardAssetLibrary);
 
   const grouped = useMemo(() => groupFlipCardAssetsByCategory(flipCardAssetLibrary), []);
   const categoryEntries = useMemo(
@@ -31,9 +33,9 @@ export function App() {
   const visibleAssets = useMemo(
     () =>
       activeCategory === 'all'
-        ? flipCardAssetLibrary
-        : flipCardAssetLibrary.filter((asset) => asset.category === activeCategory),
-    [activeCategory],
+        ? refreshedAssets
+        : refreshedAssets.filter((asset) => asset.category === activeCategory),
+    [activeCategory, refreshedAssets],
   );
 
   return (

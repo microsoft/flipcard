@@ -105,6 +105,10 @@ interface AdaptiveCardSeed {
 
 function adaptiveCardSample({ id, title, sample, summary }: AdaptiveCardSeed): FlipCardAssetEntry {
   const payload = adaptiveCardPayloads[sample];
+  const customized = id === 'adaptive-card-stock-update' || id === 'adaptive-card-activity-update';
+  const sourceUrl = customized
+    ? `https://github.com/microsoft/flipcard/blob/main/packages/vanilla/src/adaptive-card-samples/${sample.split('/').pop()}`
+    : `${ADAPTIVE_CARDS_REPO}/blob/main/samples/${sample}`;
   return {
     id,
     category: 'pattern',
@@ -119,15 +123,15 @@ function adaptiveCardSample({ id, title, sample, summary }: AdaptiveCardSeed): F
       title,
       design: {
         kind: 'pattern',
-        eyebrow: 'Adaptive Cards',
+        eyebrow: customized ? 'Flipcard · Adaptive Cards' : 'Adaptive Cards',
         headline: title,
         summary,
-        badge: 'v1.5 sample',
+        badge: id === 'adaptive-card-stock-update' ? 'Configurable quote feed' : 'v1.5 sample',
         adaptiveCard: payload,
         items: [
           { label: 'Schema', value: 'http://adaptivecards.io/schemas/adaptive-card.json' },
           { label: 'Sample path', value: sample },
-          { label: 'Source', value: 'microsoft/AdaptiveCards' },
+          { label: 'Source', value: customized ? 'microsoft/flipcard' : 'microsoft/AdaptiveCards' },
         ],
       },
       schema: payload ?? {
@@ -143,7 +147,7 @@ function adaptiveCardSample({ id, title, sample, summary }: AdaptiveCardSeed): F
           {
             id: 'open-sample',
             type: 'navigate',
-            data: { target: `${ADAPTIVE_CARDS_REPO}/blob/main/samples/${sample}` },
+            data: { target: sourceUrl },
           },
         ],
       },
@@ -241,7 +245,7 @@ const patternLibraryAssets: FlipCardAssetEntry[] = [
     id: 'adaptive-card-stock-update',
     title: 'Stock update',
     sample: 'v1.5/Scenarios/StockUpdate.json',
-    summary: 'Financial market data and stock quote display.',
+    summary: 'MSFT quote feed with provider timestamps; configure a public endpoint to enable refresh.',
   }),
   adaptiveCardSample({
     id: 'adaptive-card-food-order',
@@ -251,9 +255,9 @@ const patternLibraryAssets: FlipCardAssetEntry[] = [
   }),
   adaptiveCardSample({
     id: 'adaptive-card-activity-update',
-    title: 'Activity update',
+    title: 'Publish Flipcard Schema',
     sample: 'v1.5/Scenarios/ActivityUpdate.json',
-    summary: 'User activity and engagement notification.',
+    summary: 'Daryl Yourk · Flipcard manifest schema, repository, and reference documentation.',
   }),
   adaptiveCardSample({
     id: 'adaptive-card-input-form',
