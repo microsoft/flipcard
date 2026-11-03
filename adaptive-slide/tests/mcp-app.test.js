@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { Client, StreamableHTTPClientTransport } from "@modelcontextprotocol/client";
 
 // Test transformer
 import { renderTile, renderSlide, renderDeck } from "../dist/transformer.js";
@@ -102,16 +103,56 @@ describe("Transformer", () => {
 });
 
 describe("Viewer HTML", () => {
-  it("contains the MCP App protocol implementation", () => {
+  it("ships a self-contained SDK App bundle", () => {
     const viewer = readFileSync(
-      resolve(import.meta.dirname, "../src/plugins/mcp-app/viewer.html"),
+      resolve(import.meta.dirname, "../dist/plugins/mcp-app/viewer.html"),
       "utf-8"
     );
-    assert.ok(viewer.includes("ui/ready"));
-    assert.ok(viewer.includes("ui/toolResult"));
+    assert.ok(viewer.includes("ui/notifications/tool-result"));
     assert.ok(viewer.includes("ui/initialize"));
     assert.ok(viewer.includes("AdaptiveDeck"));
-    assert.ok(viewer.includes("TRANSFORMER"));
+    assert.ok(viewer.includes("ui/notifications/initialized"));
+    assert.ok(!/<script[^>]*src=|<!-- APP_SCRIPT -->/.test(viewer));
+  });
+
+  describe("Stateless MCP endpoint", () => {
+    for (const mode of ["auto", "legacy"]) {
+      it(`serves concurrent ${mode} clients without reusing a connected server`, async () => {
+        const { startServer } = await import("../dist/plugins/mcp-app/server.js");
+        const running = await startServer(0);
+        const clients = ["first", "second"].map(name =>
+          new Client({ name, version: "1" }, { versionNegotiation: { mode } }));
+        try {
+          await Promise.all(clients.map(client => client.connect(new StreamableHTTPClientTransport(new URL(running.url)))));
+          if (mode === "auto") assert.equal(clients[0].getNegotiatedProtocolVersion(), "2026-07-28");
+          const tools = await clients[0].listTools();
+          assert.equal(tools.tools.find(tool => tool.name === "present-deck")._meta.ui.resourceUri, "ui://adaptive-slide/viewer");
+          const results = await Promise.all(clients.map((client, i) => client.callTool({
+            name: "present-deck",
+            arguments: { deck: JSON.stringify({ ...EXAMPLE_DECK, title: `Deck ${i}` }) },
+          })));
+          assert.equal(results[0].structuredContent.title, "Deck 0");
+          assert.equal(results[1].structuredContent.title, "Deck 1");
+          const resource = await clients[0].readResource({ uri: "ui://adaptive-slide/viewer" });
+          assert.equal(resource.contents[0].mimeType, "text/html;profile=mcp-app");
+          assert.deepEqual(resource.contents[0]._meta.ui.csp.connectDomains, []);
+          const invalid = await clients[0].callTool({ name: "present-deck", arguments: { deck: "null" } });
+          assert.equal(invalid.isError, true);
+          for (const method of ["GET", "DELETE"]) {
+            const response = await fetch(running.url, { method });
+            assert.equal(response.status, 405);
+            await response.text();
+          }
+          const rejected = await fetch(running.url, { method: "POST", headers: { Origin: "https://evil.example" } });
+          assert.equal(rejected.status, 403);
+          assert.equal(rejected.headers.get("access-control-allow-origin"), null);
+          await rejected.text();
+        } finally {
+          await Promise.all(clients.map(client => client.close()));
+          await running.close();
+        }
+      });
+    }
   });
 });
 

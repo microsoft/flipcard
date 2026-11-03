@@ -9,25 +9,31 @@ React bindings for FlipCard. Ships two components — `<FlipCard>` for a single 
 
 ## Install
 
-```bash
-npm install @microsoft/flipcard-react @microsoft/flipcard-core @microsoft/flipcard-themes
-```
-
-> Requires React **≥ 18**.
+Follow [local-source setup](../getting-started.md): `npm ci` then `npm run build`
+at the repository root. The examples use workspace imports, not an assumed npm
+publication. Peer dependencies support React and React DOM **18.3.1+ in 18.x or 19.x**.
 
 ## `<FlipCard>`
 
 ```tsx
 import { FlipCard } from '@microsoft/flipcard-react';
-import '@microsoft/flipcard-themes/styles/light.css';
+import '@microsoft/flipcard/styles.css';
+import '@microsoft/flipcard-themes/base.css';
+import '@microsoft/flipcard-themes/light.css';
 
 <FlipCard
   asset={{
     id: 'welcome',
-    category: 'teal',
+    category: 'status',
+    title: 'Welcome',
+    summary: 'Click to flip.',
     theme: 'light',
-    design: { title: 'Hello FlipCard', summary: 'Click to flip.' },
-    manifest: { id: 'welcome', title: 'Welcome' },
+    manifest: {
+      id: 'welcome',
+      title: 'Welcome',
+      design: { kind: 'status', headline: 'Hello FlipCard', summary: 'Click to flip.' },
+      schema: { status: 'ready' },
+    },
   }}
   defaultState="front"
   interactive
@@ -45,7 +51,11 @@ import '@microsoft/flipcard-themes/styles/light.css';
 | `className` | `string` | Optional class merged onto the wrapper. |
 | `onFlip` | `(state: FlipState) => void` | Fired whenever the face changes. |
 
-The component renders an Adaptive Card surface on the front and a structured manifest view on the back, themed via the design tokens you import.
+The component renders category-specific design content, including an Adaptive
+Card surface for supported slide assets, and the serialized manifest on the
+back. Design belongs in `asset.manifest.design`. It does not accept `front`,
+`backJson`, a controlled `state`, or a top-level `category` prop. Use the asset's
+`theme` and import the corresponding exported theme stylesheet.
 
 ## `<FlipCardCatalog>`
 
@@ -53,9 +63,10 @@ A pre‑styled grid for browsing many cards at once.
 
 ```tsx
 import { FlipCardCatalog } from '@microsoft/flipcard-react';
+import { flipCardAssetLibrary } from '@microsoft/flipcard';
 
 <FlipCardCatalog
-  assets={[asset1, asset2, asset3]}
+  assets={flipCardAssetLibrary}
   className="my-catalog"
 />
 ```
@@ -64,14 +75,14 @@ import { FlipCardCatalog } from '@microsoft/flipcard-react';
 
 | Prop | Type | Description |
 |---|---|---|
-| `assets` | `FlipCardRenderableAsset[]` | The cards to render. |
+| `assets` | `readonly FlipCardRenderableAsset[]` | The cards to render. |
 | `className` | `string` | Optional wrapper class. |
 
 ## Types
 
 ```ts
 import type {
-  FlipCardAssetCategory,    // 'teal' | 'navy' | 'gold' | 'green' | 'red' | 'plum' | 'slate'
+  FlipCardAssetCategory,    // 'kpi' | 'status' | 'profile' | ... (not MCP color presets)
   FlipCardAssetTheme,       // 'light' | 'dark' | 'midnight-sapphire'
   FlipCardAssetDesign,
   FlipCardRenderableAsset,

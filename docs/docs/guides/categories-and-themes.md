@@ -5,11 +5,20 @@ title: Categories & themes
 
 # Categories & themes
 
-FlipCards declare two visual axes: a **category** (semantic intent and accent palette) and a **theme** (light/dark surface family).
+Asset categories, MCP authoring presets, and themes are separate concepts.
+Do not pass an MCP color preset as a React or vanilla asset category.
 
 ## Categories
 
-Seven presets ship with the system. Pick the one whose intent matches the content — not just the color you want.
+Renderable asset categories are `kpi`, `status`, `profile`, `code`, `timeline`,
+`faq`, `security`, `media`, `metric`, `chart`, `pattern`, `tile`, `portfolio`, and
+`slide`. They select content designs; use `asset.category` and
+`asset.manifest.design.kind`. The asset library's `flipCardCategoryLabels` and
+`getFlipCardAssetsByCategory` use this set.
+
+The MCP `list_categories` and `generate_manifest` tools instead expose seven
+authoring presets. Their starter manifests use `design.category` and
+`design.front`; these are not directly renderable assets:
 
 | Category | Intent | Typical content |
 |---|---|---|
@@ -35,7 +44,7 @@ Or via the MCP `list_categories` tool when authoring with an agent.
 
 ## Themes
 
-Themes change the surrounding surface palette while categories keep their semantic accent.
+Themes change the surface palette. An asset may also specify an `accent`.
 
 | Theme | When to use |
 |---|---|
@@ -43,10 +52,12 @@ Themes change the surrounding surface palette while categories keep their semant
 | `dark` | Inverse of light with brighter accent. |
 | `midnight-sapphire` | Saturated dark theme with a gold secondary; designed for showcase / hero pages. |
 
-Apply a theme by importing its CSS or by setting the corresponding class on a wrapper:
+Load the theme's exported stylesheet. Asset renderers select the class from
+`asset.theme`; the helper also supports unthemed custom DOM:
 
 ```ts
 import { getThemeClassName } from '@microsoft/flipcard';
+import '@microsoft/flipcard-themes/midnight-sapphire.css';
 
 document.body.classList.add(getThemeClassName('midnight-sapphire'));
 ```
@@ -55,10 +66,11 @@ document.body.classList.add(getThemeClassName('midnight-sapphire'));
 
 A few rules of thumb:
 
-- Mix categories freely within a single grid — that's what the catalog is for.
-- Don't change category to mean "I want red instead of teal." Use category to communicate **intent**; use theme + token overrides for color preferences.
-- Use `gold` and `red` sparingly so they keep their salience.
-- Reserve `slate` for chrome that should fade into the background.
+- Mix asset categories freely within a catalog.
+- Use asset `theme` and `accent` for visual choices, not a color preset as the asset category.
+- When using MCP starter manifests, map `design.front` to a renderer-specific
+  `manifest.design` and wrap the result in an asset before rendering.
+- Workflow descriptors never grant permission or execute actions automatically.
 
 ## See also
 

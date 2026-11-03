@@ -17,9 +17,14 @@ A FlipCard manifest is plain JSON. You can hand‑write it, generate it from a b
 }
 ```
 
-Both `id` and `title` are optional but recommended — `id` for stable references, `title` for the back‑face header.
+Both `id` and `title` are optional in the core schema but recommended.
+The core schema has no required top-level fields, so `{}` is also valid.
+This minimum is not a renderable asset.
 
-## Recommended shape
+## Authoring convention
+
+The MCP tools use this convention. Core treats `design` and `schema` as opaque
+payloads, and the renderer APIs do not interpret `design.front` automatically:
 
 ```jsonc
 {
@@ -71,7 +76,7 @@ Two layers:
 1. **Static** — point your editor at the public schema:
 
    ```json
-   { "$schema": "https://microsoft.github.io/flipcard/schema/v0.1.json", ... }
+   { "$schema": "https://microsoft.github.io/flipcard/schema/v0.1.json" }
    ```
 
    VS Code, JetBrains, and most editors will give you completion and inline validation for free.
@@ -85,24 +90,48 @@ Two layers:
    if (!result.valid) console.error(result.errors);
    ```
 
-   For full draft‑07 validation use [Ajv](https://ajv.js.org/) against `flipCardManifestSchema`.
+   This is a narrow shape check, not full JSON Schema validation. For full
+   draft-07 validation use [Ajv](https://ajv.js.org/) against
+   `flipCardManifestSchema`, with URI format support configured. Neither check
+   validates opaque design/schema payloads or grants permission to run actions.
 
 ## Patterns
 
 ### Card grid from a list of records
 
-Store one manifest per record, then render them with `<FlipCardCatalog>`:
+`FlipCardCatalog` takes assets, not bare manifests. Map records into the
+renderer-specific shape (with the [renderer CSS](../packages/react.md) loaded):
 
-```ts
-const cards = records.map((r) => ({
-  $schema: 'https://microsoft.github.io/flipcard/schema/v0.1.json',
+```tsx
+import { FlipCardCatalog, type FlipCardRenderableAsset } from '@microsoft/flipcard-react';
+
+const records = [
+  { id: 'release', name: 'Release', description: 'Ready to review', status: 'ready' },
+];
+const assets: FlipCardRenderableAsset[] = records.map((r) => ({
   id: r.id,
+  category: 'status',
   title: r.name,
-  design: { category: r.status === 'green' ? 'green' : 'red',
-            front: { title: r.name, summary: r.description } },
-  schema: { back: { title: r.name, fields: Object.entries(r) } },
+  summary: r.description,
+  theme: 'light',
+  manifest: {
+    $schema: 'https://microsoft.github.io/flipcard/schema/v0.1.json',
+    id: r.id,
+    title: r.name,
+    design: { kind: 'status', headline: r.name, summary: r.description },
+    schema: { status: r.status },
+    metadata: { category: 'status', theme: 'light', tags: [] },
+  },
 }));
+
+export function RecordCards() {
+  return <FlipCardCatalog assets={assets} />;
+}
 ```
+
+Vanilla's `FlipCardAssetEntry` additionally requires manifest `design`, `schema`,
+and `metadata` (including category, theme, and tags). The two renderers do not
+promise identical output or support every Adaptive Card feature.
 
 ### Versioning
 
@@ -110,7 +139,10 @@ Bump `version` when a card's shape changes in a way clients should detect. Keep 
 
 ### Free‑form metadata
 
-`metadata` is a free `Record<string, unknown>` — use it for ownership, build numbers, telemetry IDs, anything you want surfaced on the back face but not part of the visible design.
+Core `metadata` is a free `Record<string, unknown>` — use it for ownership,
+build numbers, and telemetry IDs. Asset metadata has additional typed fields.
+Both asset renderers serialize the whole manifest on the back; metadata is not
+a place to hide secrets.
 
 ## See also
 

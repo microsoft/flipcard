@@ -16,7 +16,7 @@
   ],
   "scripts": {
     "build": "npm run build:libs && npm run build:flipdeck",
-    "build:libs": "npm run build -w @microsoft/flipcard-core && npm run build -w @microsoft/flipcard-themes && npm run build -w @microsoft/flipcard-react -w @microsoft/flipcard && npm run build -w @microsoft/flipcard-mcp",
+    "build:libs": "npm run build -w @microsoft/flipcard-core && npm run build -w @microsoft/flipcard-themes && npm run build -w @microsoft/flipcard-react -w @microsoft/flipcard -w @microsoft/flipcard-acp -w @microsoft/flipcard-activity && npm run build -w @microsoft/flipcard-mcp",
     "build:flipdeck": "npm run build -w @microsoft/flipcard-showcase",
     "dev": "npm run dev -w @microsoft/flipcard-showcase",
     "test": "vitest run",
@@ -25,11 +25,12 @@
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md,css,html}\"",
     "format:check": "prettier --check \"**/*.{ts,tsx,js,jsx,json,md,css,html}\"",
-    "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p packages/themes/tsconfig.json --noEmit && tsc -p packages/mcp-server/tsconfig.json --noEmit && tsc -p packages/react/tsconfig.json --noEmit && tsc -p packages/vanilla/tsconfig.json --noEmit && tsc -p apps/showcase/tsconfig.json --noEmit",
-    "clean": "rimraf --glob \"packages/*/dist\" \"apps/*/dist\" .turbo"
+    "typecheck": "tsc -p packages/core/tsconfig.json --noEmit && tsc -p packages/themes/tsconfig.json --noEmit && tsc -p packages/mcp-server/tsconfig.json --noEmit && tsc -p packages/react/tsconfig.json --noEmit && tsc -p packages/vanilla/tsconfig.json --noEmit && tsc -p packages/acp-client/tsconfig.json --noEmit && tsc -p packages/activity/tsconfig.json --noEmit && tsc -p apps/showcase/tsconfig.json --noEmit",
+    "clean": "node scripts/clean.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",
+    "@microsoft/flipcard-minimatch-compat": "file:tools/minimatch-compat",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.8",
@@ -37,6 +38,7 @@
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.2",
+    "ajv": "^8.20.0",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react": "^7.37.5",
@@ -46,13 +48,27 @@
     "prettier": "^3.9.10",
     "react": "^19.3.1",
     "react-dom": "^19.3.1",
-    "rimraf": "^6.1.3",
     "tsup": "^9.0.0",
     "typescript": "^7.0.2",
     "vite": "^8.3.5",
     "vitest": "^5.0.5"
   },
   "overrides": {
+    "eslint": {
+      "minimatch": "$@microsoft/flipcard-minimatch-compat"
+    },
+    "@eslint/config-array": {
+      "minimatch": "$@microsoft/flipcard-minimatch-compat"
+    },
+    "@eslint/eslintrc": {
+      "minimatch": "$@microsoft/flipcard-minimatch-compat"
+    },
+    "eslint-plugin-react": {
+      "minimatch": "$@microsoft/flipcard-minimatch-compat"
+    },
+    "@typescript-eslint/typescript-estree": {
+      "minimatch": "11.0.1"
+    },
     "ts-api-utils": {
       "typescript": "^6.0.3"
     }

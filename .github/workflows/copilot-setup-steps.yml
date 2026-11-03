@@ -46,6 +46,6 @@ jobs:
         working-directory: adaptive-slide
         run: npm ci
       - name: Install gh-aw extension
-        uses: github/gh-aw-actions/setup-cli@239aec45b78c8799417efdd5bc6d8cc036629ec1 # v0.71.1
+        uses: github/gh-aw-actions/setup-cli@221ba4f4319de6b8e809d1a15528b3ae6a818aa5 # v1.0.1
         with:
-          version: v0.71.1
+          version: v1.0.1

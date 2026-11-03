@@ -3,8 +3,11 @@ node_modules
 
 # Build output
 dist
+!tools/svgr-plugin-svgo/dist/
+!tools/svgr-plugin-svgo/dist/**
 build
-out
+out
+
 .docusaurus
 _site
 *.tsbuildinfo
@@ -81,6 +84,7 @@ credentials.json
 credentials.yaml
 credentials.yml
 .npmrc
+!docs/.npmrc
 .yarnrc
 .netrc
 auth.json

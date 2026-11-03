@@ -12,7 +12,7 @@ The FlipCard manifest is a JSON Schema (draft‑07) document published at:
 Reference it from any manifest via `$schema` to get editor completion and validation:
 
 ```json
-{ "$schema": "https://microsoft.github.io/flipcard/schema/v0.1.json", ... }
+{ "$schema": "https://microsoft.github.io/flipcard/schema/v0.1.json" }
 ```
 
 ## Schema (draft‑07)
@@ -62,13 +62,18 @@ import { flipCardManifestSchema, FLIPCARD_SCHEMA_URL } from '@microsoft/flipcard
 
 ## Field semantics
 
+All top-level fields are optional; the schema accepts `{}` but rejects unknown
+top-level properties. `design` and `schema` have unconstrained schemas: a
+draft-07 validation pass does not validate their contents or guarantee a
+renderable card.
+
 | Field | Type | Notes |
 |---|---|---|
 | `$schema` | `string (uri)` | Should always point at the published schema URL. |
 | `version` | `string` | Manifest semver. Bump when the shape changes meaningfully. |
 | `id` | `string` | Stable identifier. Recommend kebab‑case. |
 | `title` | `string` | Human‑readable label, typically used on the back face. |
-| `design` | `unknown` | Opaque to the core; the renderer interprets it. The conventional shape is `{ category, front: { title, summary, ... } }`. |
+| `design` | `unknown` | Opaque to core. MCP starters use `{ category, front: { title, summary } }`; asset renderers instead require `kind` and `headline`. |
 | `schema` | `unknown` | Structured payload exposed on the back face. The conventional shape is `{ back: { title, fields: [] } }`. |
 | `workflow` | `object` | Optional. `onFlip` is an event name; `actions[]` are declarative descriptors. |
 | `workflow.actions[]` | `object` | Each requires `id` and `type`; `data` is free‑form. |
@@ -88,4 +93,13 @@ validateManifest({ id: 5 });
 // → { valid: false, errors: ['id must be a string'] }
 ```
 
-Use [Ajv](https://ajv.js.org/) against `flipCardManifestSchema` for full draft‑07 validation in build pipelines.
+The runtime check currently checks only non-null object input, string values
+for `$schema`/`version`/`id`/`title`, and non-null object values for `workflow`
+and `metadata`. It does not reject arrays, unknown properties, invalid URI
+formats, or malformed nested actions. A result of `valid: true` is not a
+complete draft-07 validation result.
+
+Use [Ajv](https://ajv.js.org/) against `flipCardManifestSchema`, with URI format
+support configured, for full draft-07 validation in build pipelines. Validate
+renderer assets, Adaptive Card payloads, and authorized workflow behavior
+separately. Workflow descriptors never execute themselves.

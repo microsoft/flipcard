@@ -5,6 +5,8 @@ import {
   validateManifest,
 } from '@microsoft/flipcard-core';
 import { z } from 'zod';
+import { registerAppTool } from '@modelcontextprotocol/ext-apps/server';
+import { FLIPCARD_APP_URI } from './app.js';
 
 export const CATEGORY_DESCRIPTIONS = [
   { category: 'teal', description: 'Primary action cards for live content and launch points.' },
@@ -45,7 +47,9 @@ type GenerateManifestInput = z.infer<z.ZodObject<typeof generateManifestInputSch
 type DescribeComponentInput = z.infer<z.ZodObject<typeof describeComponentInputSchema>>;
 
 export interface ToolResponse {
+  [key: string]: unknown;
   content: Array<{ type: 'text'; text: string }>;
+  structuredContent?: Record<string, unknown>;
 }
 
 export type ToolHandler<TInput> = (input: TInput) => ToolResponse | Promise<ToolResponse>;
@@ -57,7 +61,7 @@ export interface ToolDefinition<TInput> {
   handler: ToolHandler<TInput>;
 }
 
-export type ToolRegistrar = Pick<import('@modelcontextprotocol/sdk/server/mcp.js').McpServer, 'registerTool'>;
+export type ToolRegistrar = Pick<import('@modelcontextprotocol/server').McpServer, 'registerTool'>;
 
 function toTextResult(result: unknown): ToolResponse {
   return {
@@ -186,7 +190,10 @@ export const flipCardToolDefinitions = [
     name: 'generate_manifest',
     description: 'Generate a starter FlipCard manifest for a category and optional titles.',
     inputSchema: generateManifestInputSchema,
-    handler: async (input) => toTextResult(createStarterManifest(input)),
+    handler: async (input) => {
+      const manifest = createStarterManifest(input);
+      return { ...toTextResult(manifest), structuredContent: { manifest } };
+    },
   },
   {
     name: 'describe_component',
@@ -204,6 +211,14 @@ export const flipCardToolDefinitions = [
 
 export function registerFlipCardTools(server: ToolRegistrar): void {
   for (const definition of flipCardToolDefinitions) {
+    if (definition.name === 'generate_manifest') {
+      registerAppTool(server, definition.name, {
+        description: definition.description,
+        inputSchema: z.object(definition.inputSchema),
+        _meta: { ui: { resourceUri: FLIPCARD_APP_URI } },
+      }, definition.handler);
+      continue;
+    }
     server.registerTool(
       definition.name,
       {

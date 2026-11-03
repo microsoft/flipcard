@@ -1,85 +1,46 @@
 {
-	"$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
-	"type": "AdaptiveCard",
-	"version": "1.5",
-	"speak": "Microsoft stock is trading at $62.30 a share, which is down .32%",
-	"body": [
-		{
-			"type": "Container",
-			"items": [
-				{
-					"type": "TextBlock",
-					"text": "Microsoft Corporation",
-					"size": "medium",
-					"wrap": true,
-					"style": "heading"
-				},
-				{
-					"type": "TextBlock",
-					"text": "Nasdaq Global Select: MSFT",
-					"isSubtle": true,
-					"spacing": "none",
-					"wrap": true
-				},
-				{
-					"type": "TextBlock",
-					"text": "Fri, May 3, 2019 1:00 PM",
-					"wrap": true
-				}
-			]
-		},
-		{
-			"type": "Container",
-			"spacing": "none",
-			"items": [
-				{
-					"type": "ColumnSet",
-					"columns": [
-						{
-							"type": "Column",
-							"width": "stretch",
-							"items": [
-								{
-									"type": "TextBlock",
-									"text": "128.90",
-									"size": "extraLarge",
-									"wrap": true
-								},
-								{
-									"type": "TextBlock",
-									"text": "▲ 2.69 USD (2.13%)",
-									"color": "good",
-									"spacing": "none",
-									"wrap": true
-								}
-							]
-						},
-						{
-							"type": "Column",
-							"width": "auto",
-							"items": [
-								{
-									"type": "FactSet",
-									"facts": [
-										{
-											"title": "Open",
-											"value": "127.42"
-										},
-										{
-											"title": "High",
-											"value": "129.43"
-										},
-										{
-											"title": "Low",
-											"value": "127.25"
-										}
-									]
-								}
-							]
-						}
-					]
-				}
-			]
-		}
-	]
+  "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+  "type": "AdaptiveCard",
+  "version": "1.5",
+  "speak": "Microsoft stock quote is not configured. No market price is available.",
+  "body": [
+    {
+      "type": "TextBlock",
+      "text": "Microsoft Corporation",
+      "size": "medium",
+      "weight": "bolder",
+      "style": "heading",
+      "wrap": true
+    },
+    { "type": "TextBlock", "text": "Nasdaq: MSFT · USD", "isSubtle": true, "wrap": true },
+    {
+      "type": "TextBlock",
+      "id": "quote-status",
+      "text": "Not configured — set VITE_STOCK_QUOTE_ENDPOINT to a public quote endpoint.",
+      "wrap": true
+    },
+    { "type": "TextBlock", "id": "quote-price", "text": "—", "size": "extraLarge", "wrap": true },
+    { "type": "TextBlock", "id": "quote-change", "text": "Change: unavailable", "wrap": true },
+    {
+      "type": "TextBlock",
+      "id": "quote-as-of",
+      "text": "Market timestamp: unavailable",
+      "wrap": true
+    },
+    {
+      "type": "TextBlock",
+      "id": "quote-provider",
+      "text": "No quote provider configured",
+      "wrap": true
+    },
+    { "type": "TextBlock", "id": "quote-open", "text": "Open: —", "wrap": true },
+    { "type": "TextBlock", "id": "quote-high", "text": "High: —", "wrap": true },
+    { "type": "TextBlock", "id": "quote-low", "text": "Low: —", "wrap": true },
+    {
+      "type": "TextBlock",
+      "text": "Configured quotes refresh every 5 minutes while this page is visible and online. Source data may be delayed or end-of-day. Informational only; not financial advice.",
+      "isSubtle": true,
+      "wrap": true
+    }
+  ]
 }

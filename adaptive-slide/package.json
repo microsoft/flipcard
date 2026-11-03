@@ -10,12 +10,12 @@
   },
   "scripts": {
     "build": "tsc && npm run copy-assets",
-    "copy-assets": "node -e \"require('node:fs').copyFileSync('src/plugins/mcp-app/viewer.html', 'dist/plugins/mcp-app/viewer.html')\"",
+    "copy-assets": "tsup --config src/plugins/mcp-app/tsup.config.ts && node src/plugins/mcp-app/build-viewer.mjs",
     "validate": "node scripts/validate.js",
     "test": "node --test tests/*.test.js",
     "lint": "tsc --noEmit",
     "serve": "node dist/plugins/mcp-app/server.js",
-    "dev": "tsx src/plugins/mcp-app/server.ts"
+    "dev": "npm run copy-assets && tsx src/plugins/mcp-app/server.ts"
   },
   "keywords": [
     "adaptive-cards",
@@ -29,19 +29,15 @@
   "author": "",
   "license": "MIT",
   "dependencies": {
-    "@modelcontextprotocol/sdk": "^1.32.2",
-    "cors": "^2.8.6",
-    "express": "^5.3.0",
+    "@modelcontextprotocol/server": "^2.4.0",
+    "@modelcontextprotocol/node": "^2.1.2",
+    "@modelcontextprotocol/ext-apps": "^2.0.4",
     "zod": "^4.6.7"
   },
-  "overrides": {
-    "@modelcontextprotocol/sdk": {
-      "@hono/node-server": "2.1.5"
-    }
-  },
   "devDependencies": {
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.6",
+    "@modelcontextprotocol/client": "^2.4.0",
+    "happy-dom": "^21.0.4",
+    "tsup": "^9.0.0",
     "@types/node": "^26.6.5",
     "ajv": "^8.20.0",
     "ajv-formats": "^3.0.1",

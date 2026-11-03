@@ -1,0 +1,12 @@
+{
+  "name": "@microsoft/flipcard-minimatch-compat",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Scoped callable minimatch compatibility for Flipcard build tooling",
+  "license": "MIT",
+  "main": "./index.cjs",
+  "files": ["index.cjs"],
+  "dependencies": {
+    "minimatch-modern": "npm:minimatch@11.0.1"
+  }
+}

@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>FlipCard viewer</title>
+  <script>
+    (() => {
+      const param = new URLSearchParams(window.location.search).get("scoutTheme");
+      const theme =
+        param || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+      document.documentElement.setAttribute("data-theme", theme);
+    })();
+  </script>
+  <style>
+    :root {
+      color-scheme: light;
+      --cp-bg: #f7f4ef;
+      --cp-bg-elevated: #fcfbf8;
+      --cp-surface: #ffffff;
+      --cp-surface-soft: #f5f5f5;
+      --cp-border: #dedede;
+      --cp-border-strong: #919191;
+      --cp-text: #242424;
+      --cp-text-muted: #5c5c5c;
+      --cp-text-soft: #6f6f6f;
+      --cp-accent: #b11f4b;
+      --cp-accent-hover: #9a1a41;
+      --cp-accent-soft: rgba(177, 31, 75, 0.08);
+      --cp-accent-fg: #ffffff;
+      --cp-success: #16a34a;
+      --cp-danger: #dc2626;
+      --cp-warning: #f59e0b;
+      --cp-link: #0078d4;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.12);
+      --cp-overlay: rgba(255, 255, 255, 0.8);
+      --cp-panel: rgba(255, 255, 255, 0.86);
+      --cp-panel-strong: rgba(255, 255, 255, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.55);
+      --cp-highlight: rgba(177, 31, 75, 0.12);
+    }
+    html[data-theme="dark"] {
+      color-scheme: dark;
+      --cp-bg: #3d3b3a;
+      --cp-bg-elevated: #343231;
+      --cp-surface: #292929;
+      --cp-surface-soft: #2e2e2e;
+      --cp-border: #474747;
+      --cp-border-strong: #5f5f5f;
+      --cp-text: #dedede;
+      --cp-text-muted: #919191;
+      --cp-text-soft: #b0b0b0;
+      --cp-accent: #fd8ea1;
+      --cp-accent-hover: #fb7b91;
+      --cp-accent-soft: rgba(253, 142, 161, 0.14);
+      --cp-accent-fg: #1a1a1a;
+      --cp-success: #4ade80;
+      --cp-danger: #f87171;
+      --cp-warning: #fbbf24;
+      --cp-link: #4da6ff;
+      --cp-shadow: 0 18px 48px rgba(0, 0, 0, 0.32);
+      --cp-overlay: rgba(41, 41, 41, 0.88);
+      --cp-panel: rgba(41, 41, 41, 0.72);
+      --cp-panel-strong: rgba(41, 41, 41, 0.96);
+      --cp-sheen: rgba(255, 255, 255, 0.04);
+      --cp-highlight: rgba(253, 142, 161, 0.12);
+    }
+    :root { font-family: "Segoe UI", Aptos, Calibri, -apple-system, BlinkMacSystemFont, sans-serif; }
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 20px; background: var(--cp-bg); color: var(--cp-text); }
+    header { display: flex; gap: 12px; align-items: baseline; margin-bottom: 16px; }
+    header strong { letter-spacing: .05em; }
+    header span { color: var(--cp-text-muted); font-size: .85rem; }
+    .layout { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 20px; }
+    article { border-radius: 16px; padding: 24px; min-height: 260px; background: var(--cp-surface); border: 1px solid var(--cp-border); border-top: 4px solid var(--cp-accent); }
+    .eyebrow { color: var(--cp-accent); text-transform: uppercase; font-weight: 700; font-size: .8rem; letter-spacing: .12em; }
+    h1 { font-size: 1.65rem; overflow-wrap: anywhere; }
+    p { line-height: 1.5; }
+    button, select, input { font: inherit; border: 1px solid var(--cp-border-strong); border-radius: .625rem; padding: 8px 12px; background: var(--cp-surface); color: var(--cp-text); }
+    button { cursor: pointer; background: var(--cp-accent); color: var(--cp-accent-fg); }
+    button:hover:not(:disabled) { background: var(--cp-accent-hover); }
+    button:disabled { opacity: .5; cursor: default; }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--cp-link); outline-offset: 3px; }
+    form { display: grid; gap: 12px; margin-top: 20px; }
+    label { display: grid; gap: 4px; font-size: .9rem; }
+    pre { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 400px; overflow: auto; font: .8rem Consolas, "Courier New", Courier, monospace; padding: 16px; background: var(--cp-surface-soft); border-radius: .625rem; }
+    [hidden] { display: none !important; }
+    #status { min-height: 1.5em; font-size: .9rem; }
+    @media (max-width: 600px) { .layout { grid-template-columns: 1fr; } body { padding: 12px; } }
+    @media (prefers-reduced-motion: no-preference) { article { transition: border-color .2s; } }
+  </style>
+</head>
+<body>
+  <header><strong>FLIPCARD</strong><span>Design in front. Contract on the back.</span></header>
+  <main class="layout">
+    <section aria-label="Card preview">
+      <article id="card">
+        <div class="eyebrow" id="category">Manifest preview</div>
+        <div id="front"><h1 id="front-title">Your next card</h1><p id="summary">Waiting for a generated FlipCard…</p></div>
+        <div id="back" hidden><h1 id="back-title">Manifest</h1><pre id="fields"></pre></div>
+      </article>
+      <p><button id="flip" type="button" disabled aria-pressed="false">Show back face</button></p>
+      <form id="generate">
+        <label>Front title<input id="title" required maxlength="200" value="My FlipCard"></label>
+        <label>Category<select id="category-select"><option>teal</option><option>navy</option><option>gold</option><option>green</option><option>red</option><option>plum</option><option>slate</option></select></label>
+        <button id="regenerate" type="submit" disabled>Generate card</button>
+      </form>
+      <p id="status" role="status" aria-live="polite">Connecting to host…</p>
+    </section>
+    <section aria-label="Manifest"><h2>Manifest</h2><pre id="manifest">No manifest yet.</pre></section>
+  </main>
+  <!-- APP_SCRIPT -->
+</body>
+</html>

@@ -21,18 +21,33 @@
 | `flipcard://schema` | Manifest schema as `application/schema+json` |
 | `flipcard://categories` | Category metadata as JSON |
 | `flipcard://examples/{category}` | Starter manifest JSON for a category |
+| `ui://flipcard/viewer` | Self-contained interactive MCP App (`text/html;profile=mcp-app`) |
 
-## Install
+`generate_manifest` preserves its JSON text response and additionally returns
+`structuredContent.manifest`. Its `_meta.ui.resourceUri` binds the viewer to that
+tool. Hosts without MCP Apps support can continue consuming the text response.
+
+The viewer uses the official MCP Apps SDK lifecycle (Apps revision `2026-01-26`),
+handles tool input/results, flips between card faces, and regenerates cards via
+host-mediated `tools/call`. It follows the host theme and disables controls on
+teardown. All scripts/styles are bundled inline; the resource's CSP requests no
+external connections, resources, frames, or base URIs. The host must enforce the
+MCP Apps sandbox and resource policy.
+
+## Build from source
+
+The server is distributed with this monorepo. Do not rely on an npm publication
+that may not exist. From the repository root:
 
 ```bash
-npm install -g @microsoft/flipcard-mcp
+npm ci
+npm run build
+node packages/mcp-server/dist/cli.js
 ```
 
-or run without a global install:
-
-```bash
-npx @microsoft/flipcard-mcp
-```
+Agent Plugins 1.0-compatible hosts can install the built repository root using
+its `plugin.json` and `mcp.json`. Otherwise configure the local command below,
+replacing the example checkout path with your absolute path.
 
 ## Configure Claude Desktop
 
@@ -44,8 +59,8 @@ Windows: `%APPDATA%\Claude\claude_desktop_config.json`
 {
   "mcpServers": {
     "flipcard": {
-      "command": "npx",
-      "args": ["-y", "@microsoft/flipcard-mcp"]
+      "command": "node",
+      "args": ["C:\\repos\\flipcard\\packages\\mcp-server\\dist\\cli.js"]
     }
   }
 }
@@ -57,11 +72,12 @@ See the [GitHub Copilot CLI documentation](https://github.com/github/copilot-cli
 
 ```json
 {
-  "servers": {
+  "mcpServers": {
     "flipcard": {
-      "command": "npx",
-      "args": ["-y", "@microsoft/flipcard-mcp"],
-      "transport": "stdio"
+      "type": "stdio",
+      "command": "node",
+      "args": ["C:\\repos\\flipcard\\packages\\mcp-server\\dist\\cli.js"],
+      "tools": ["*"]
     }
   }
 }
@@ -75,8 +91,8 @@ Use the same stdio command shape:
 {
   "mcpServers": {
     "flipcard": {
-      "command": "npx",
-      "args": ["-y", "@microsoft/flipcard-mcp"]
+      "command": "node",
+      "args": ["C:\\repos\\flipcard\\packages\\mcp-server\\dist\\cli.js"]
     }
   }
 }
@@ -90,12 +106,47 @@ From `packages/mcp-server`:
 npm run build && npm run start
 ```
 
+The build produces both the server/CLI and the self-contained viewer HTML.
+Declaration output uses TypeScript separately from tsup (including TypeScript 7).
+Use Node.js 22.18+ in 22.x, 24.11+ in 24.x, or 26+ for repository builds.
+The server uses the split MCP server/client SDK 2.4 packages and the Node
+transport package; the Apps viewer uses `@modelcontextprotocol/ext-apps` 2.0.4.
+
+## Local HTTP transport
+
+Stdio remains the default. Opt into the localhost-only HTTP endpoint:
+
+```bash
+node packages/mcp-server/dist/cli.js --transport http --host 127.0.0.1 --port 3000
+```
+
+Connect an MCP client to `http://127.0.0.1:3000/mcp`. The official SDK
+`createMcpHandler` serves current MCP `2026-07-28` discovery and per-request
+metadata, with its stateless `2025-11-25` compatibility fallback. Every request
+gets a fresh server and transport; there are no protocol session IDs or shared
+client state. GET, HEAD, DELETE, PUT, and OPTIONS are not separate endpoints:
+only POST is supported (405 otherwise).
+
+Host and Origin headers are validated against loopback hosts. No wildcard CORS,
+authentication, remote binding, OAuth, or legacy HTTP+SSE endpoint is provided.
+Only `127.0.0.1`, `localhost`, and `::1` may be bound. CLI ports must be whole
+numbers from 1 to 65535; programmatic use additionally accepts port 0.
+
 ## Programmatic use
 
 ```ts
 import { createFlipCardServer } from '@microsoft/flipcard-mcp';
 
 const server = createFlipCardServer();
+```
+
+```ts
+import { startFlipCardHttpServer } from '@microsoft/flipcard-mcp';
+
+const endpoint = await startFlipCardHttpServer({ port: 0 });
+console.log(endpoint.url);
+// On application shutdown:
+await endpoint.close();
 ```
 
 ## Tool examples
@@ -137,6 +188,10 @@ Output excerpt:
 ```
 
 ### `validate_manifest`
+
+This calls the narrow core runtime validator, not a complete draft-07 engine.
+It does not validate arbitrary design/schema payloads, certify compatibility
+with React/vanilla asset types, or authorize workflow actions.
 
 Input:
 
@@ -204,6 +259,5 @@ Output excerpt:
 
 ## Roadmap
 
-- HTTP/SSE transport
 - OAuth-protected deployments
 - Manifest authoring assistant workflows

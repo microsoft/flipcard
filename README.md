@@ -19,45 +19,74 @@ That makes FlipCard a primitive for composable interfaces, adaptive surfaces, an
 
 ## Quickstart
 
+Build the local source checkout first; these examples do not assume the packages
+are published to npm. Use Node.js **22.18+ (22.x), 24.11+ (24.x), or 26+** and npm 10+.
+
+```bash
+npm ci
+npm run build
+npm run dev
+```
+
 ### React
 
 ```tsx
 import { FlipCard } from '@microsoft/flipcard-react';
+import { flipCardAssetLibrary } from '@microsoft/flipcard';
+import '@microsoft/flipcard/styles.css';
 import '@microsoft/flipcard-themes/base.css';
 import '@microsoft/flipcard-themes/light.css';
+import '@microsoft/flipcard-themes/dark.css';
+import '@microsoft/flipcard-themes/midnight-sapphire.css';
 
-<FlipCard front={<div>Hello</div>} backJson={{ id: 'demo', schema: 'v0.1' }} category="teal" />;
+export function App() {
+  const asset = flipCardAssetLibrary[0];
+  return asset ? <FlipCard asset={asset} onFlip={console.log} /> : null;
+}
 ```
 
-### Vanilla Web Component
+### Vanilla DOM
 
-```html
-<script type="module">
-  import '@microsoft/flipcard/auto';
-</script>
-<flip-card category="teal" back-title="Manifest">
-  <div>Hello</div>
-</flip-card>
+```ts
+import { createFlipCardElement, flipCardAssetLibrary } from '@microsoft/flipcard';
+import '@microsoft/flipcard/styles.css';
+import '@microsoft/flipcard-themes/base.css';
+import '@microsoft/flipcard-themes/light.css';
+import '@microsoft/flipcard-themes/dark.css';
+import '@microsoft/flipcard-themes/midnight-sapphire.css';
+
+const asset = flipCardAssetLibrary[0];
+if (asset) document.body.append(createFlipCardElement(asset));
 ```
+
+The vanilla API creates an `HTMLButtonElement`; it does not register a custom
+element or export `/auto`. React accepts an `asset`, not `front`/`backJson` props.
+See the [getting-started guide](https://microsoft.github.io/flipcard/getting-started).
 
 ## Packages
 
-| Package                      | Description                                  | npm                                                        |
-| ---------------------------- | -------------------------------------------- | ---------------------------------------------------------- |
-| `@microsoft/flipcard-core`   | Framework-agnostic types, schema, controller | <https://www.npmjs.com/package/@microsoft/flipcard-core>   |
-| `@microsoft/flipcard-react`  | React component bindings                     | <https://www.npmjs.com/package/@microsoft/flipcard-react>  |
-| `@microsoft/flipcard`        | Web Component `<flip-card>`                  | <https://www.npmjs.com/package/@microsoft/flipcard>        |
-| `@microsoft/flipcard-themes` | CSS themes & tokens                          | <https://www.npmjs.com/package/@microsoft/flipcard-themes> |
+| Package | Description | Local source |
+| --- | --- | --- |
+| `@microsoft/flipcard-core` | Framework-agnostic types, schema, controller | `packages/core` |
+| `@microsoft/flipcard-react` | React asset components | `packages/react` |
+| `@microsoft/flipcard` | DOM renderer and asset library | `packages/vanilla` |
+| `@microsoft/flipcard-themes` | CSS themes and tokens | `packages/themes` |
+| `@microsoft/flipcard-mcp` | MCP server and MCP Apps viewer | `packages/mcp-server` |
+| `@microsoft/flipcard-acp` | ACP v1 streaming client | `packages/acp-client` |
+| `@microsoft/flipcard-activity` | Activity envelopes and Adaptive Card adapters | `packages/activity` |
 
 ## Architecture
 
 ```text
-Q:\flipcard
+flipcard
 ├─ packages
 │  ├─ core       -> schema, controller, types
-│  ├─ react      -> React FlipCard + hook
-│  ├─ vanilla    -> <flip-card> custom element
-│  └─ themes     -> CSS themes and tokens
+│  ├─ react      -> FlipCard and FlipCardCatalog
+│  ├─ vanilla    -> DOM renderer and asset library
+│  ├─ themes     -> CSS themes and tokens
+│  ├─ mcp-server -> MCP tools, resources, and Apps viewer
+│  ├─ acp-client -> stream-injected ACP client
+│  └─ activity   -> transport-free Activity adapters
 ├─ apps
 │  └─ showcase   -> FlipDeck (Vite gallery, deployed to /flipdeck/ and /showcase/)
 └─ .github
@@ -73,11 +102,125 @@ Q:\flipcard
 ## Development
 
 ```bash
-npm install
+npm ci
+npm run build:libs
 npm run dev          # FlipDeck (Vite dev server)
 npm test
 npm run build
 ```
+
+TypeScript 7 compiles the workspaces. TypeScript 6 is isolated in the lint
+tooling workspace for parser compatibility, not used as the application compiler.
+The [documentation deployment](./docs/README.md) uses GitHub Actions, not Jekyll.
+
+The showcase MSFT quote card defaults to **Not configured**. Set
+`VITE_STOCK_QUOTE_ENDPOINT` to your public HTTPS (or same-origin) JSON endpoint
+before development/build to enable five-minute refreshes. Do not embed private
+API keys in Vite environment variables. Provider availability, licensing, and
+browser CORS must be verified by the hosting owner; no anonymous-provider
+fallback or synthetic live prices are supplied. See
+[the endpoint contract and state behavior](./docs/docs/getting-started.md#stock-quote-card).
+
+### Agent Plugins 1.0
+
+The repository root is an [Agent Plugins 1.0.0](https://agent-plugins.org/specification)
+plugin. `plugin.json` describes the plugin, and `mcp.json` launches the built
+Flipcard MCP server over stdio. The schema version is independent of the plugin's
+release version.
+
+Clone this repository, run `npm ci` and `npm run build`, then install the local
+repository directory in an Agent Plugins 1.0-compatible client. For Copilot CLI:
+
+```bash
+copilot plugin install .
+```
+
+The client expands `${PLUGIN_ROOT}` in the server arguments and working directory.
+Keep the built repository and its installed dependencies available at that path.
+This is a local-source distribution, not a dependency on an unpublished npm package.
+Installing the plugin does not grant filesystem access or automatically approve
+tool execution; the host retains its normal permission controls.
+
+The published 1.0.0 schemas are included under `schemas/agent-plugins/1.0.0` so
+the manifest tests run offline against the exact targeted specification.
+
+### Agent Client Protocol
+
+`@microsoft/flipcard-acp` implements the stable
+[Agent Client Protocol v1](https://agentclientprotocol.com/protocol/v1/initialization)
+client profile using `@agentclientprotocol/sdk` 2.0.2. SDK version 2 does not mean
+ACP wire protocol v2. The host supplies UTF-8 NDJSON streams and owns process
+startup, authentication, and termination.
+
+```ts
+import { connectAcp } from '@microsoft/flipcard-acp';
+
+const client = await connectAcp({
+  input: agentOutput,
+  output: agentInput,
+});
+const session = await client.createSession({
+  cwd: absoluteProjectDirectory,
+  mcpServers: [],
+});
+const unsubscribe = session.subscribe((state, event) => {
+  console.log(state, event);
+});
+await session.prompt('Describe this project.');
+unsubscribe();
+await session.dispose();
+await client.dispose();
+```
+
+Here `agentOutput` and `agentInput` are host-supplied Web streams of `Uint8Array`,
+and `absoluteProjectDirectory` is an absolute working directory. Call
+`session.cancel()` while a prompt is running to send `session/cancel`; it waits
+for the agent's prompt response. `client.dispose()` disconnects a stuck agent
+connection but does not terminate the host-owned subprocess.
+
+The client negotiates the protocol and streams bounded per-session updates. Tool permissions are denied
+unless the host provides an `onPermission` callback that obtains explicit consent
+and returns one of the agent's offered option IDs. It does not advertise
+filesystem, terminal, session-restoration, or elicitation capabilities it has not
+implemented. This is a client adapter, not an ACP agent or browser-to-stdio server.
+
+### Microsoft Activity Protocol
+
+`@microsoft/flipcard-activity` adapts
+[Microsoft 365 Agents Activity Protocol](https://learn.microsoft.com/en-us/microsoft-365/agents-sdk/activity-protocol)
+envelopes and actual Adaptive Card attachments:
+
+```ts
+import {
+  activityToFlipCards,
+  createFlipCardMessage,
+} from '@microsoft/flipcard-activity';
+
+const activity = createFlipCardMessage(
+  {
+    title: 'Status',
+    schema: {
+      type: 'AdaptiveCard',
+      version: '1.5',
+      body: [{ type: 'TextBlock', text: 'Ready to review' }],
+    },
+  },
+  {
+    channelId: 'example',
+    conversation: { id: 'conversation-1' },
+    from: { id: 'agent' },
+    recipient: { id: 'user' },
+  },
+);
+const { cards } = activityToFlipCards(activity);
+```
+
+Unknown protocol fields and unsupported attachments are preserved. Arbitrary
+Flipcard schemas are never mislabeled as Adaptive Cards. The package also provides
+explicit `adaptiveCard/action` invoke parsing, response bodies, and opt-in
+dispatch; it does not fetch URLs or automatically execute actions. Channel
+authentication, HTTP responses, Teams/Direct Line hosting, and host-specific
+Adaptive Card feature support remain the integrating application's responsibility.
 
 ## Why FlipCard?
 
@@ -92,7 +235,10 @@ FlipCard is more than a component. It is the first primitive in a system where:
 
 ## Atomic Design System
 
-FlipCard composes upward through a strict atomic hierarchy. Every layer is schema-addressable, every layer is independently themeable, and every layer carries the same `front / back / flip` contract.
+The design direction is an atomic hierarchy of schema-addressable, independently
+themeable primitives. The table below describes that model, not a list of
+currently exported components. Today's public rendering APIs are `FlipCard`,
+`FlipCardCatalog`, and `createFlipCardElement`.
 
 | Atomic Tier   | Primitive          | Role                                                                 |
 | ------------- | ------------------ | -------------------------------------------------------------------- |
@@ -107,7 +253,9 @@ The naming convention is intentional and load-bearing: every primitive is `noun-
 
 ## Adaptive Apps Marketplace
 
-FlipCard is the foundation of a community-driven marketplace of schema-driven applications. Each app is composed entirely from the atomic primitives above, ships its own manifest schema, and can be inspected, remixed, and extended through the same flip-to-back contract.
+The marketplace direction is a collection of schema-driven applications that
+can be inspected and remixed. `adaptive-slide` is vendored today; the other apps
+below are planned, not installed or implemented packages.
 
 | App                  | Status  | Source                                                          | Description                                                              |
 | -------------------- | ------- | --------------------------------------------------------------- | ------------------------------------------------------------------------ |
@@ -120,7 +268,8 @@ FlipCard is the foundation of a community-driven marketplace of schema-driven ap
 
 ### First app: `adaptive-slide`
 
-[`adaptive-slide/`](./adaptive-slide) is vendored into this monorepo as the reference implementation of an adaptive app. It demonstrates the full atomic stack:
+[`adaptive-slide/`](./adaptive-slide) is vendored into this monorepo as an adaptive
+app example. Its deck/card/tile structure maps to the design model:
 
 ```text
 Deck (adaptive-surface)
@@ -134,7 +283,8 @@ Highlights:
 
 - Decks are pure JSON, validated against `schemas/deck.schema.json`
 - Tile types: `Tile.Text`, `Tile.Image`, `Tile.Code`, `Tile.Chart`, `Tile.Media`, `Tile.Container`
-- Ships an MCP App plugin (`present-deck`, `list-slides`) so any MCP host (Claude Desktop, VS Code Copilot) can render decks in a sandboxed iframe
+- Ships an MCP App plugin (`present-deck`, `list-slides`) for hosts supporting MCP Apps revision `2026-01-26`; other MCP hosts can consume tool text
+- The self-contained MCP preview renders charts as tables and disables remote images; it is not the full presentation renderer
 - Themes, transitions, and layout modes are schema-driven — no code changes required to restyle a deck
 
 See [`adaptive-slide/README.md`](./adaptive-slide/README.md) for the full quickstart and [`adaptive-slide/examples/hello-world.deck.json`](./adaptive-slide/examples/hello-world.deck.json) for a working sample.

@@ -27,6 +27,7 @@
     "react-dom": "^19.3.1"
   },
   "devDependencies": {
+    "@microsoft/flipcard-svgr-plugin-svgo": "file:../tools/svgr-plugin-svgo",
     "@docusaurus/module-type-aliases": "3.10.2",
     "@docusaurus/tsconfig": "3.10.2",
     "@docusaurus/types": "3.10.2",
@@ -49,8 +50,17 @@
     "node": ">=20.0"
   },
   "overrides": {
+    "@docusaurus/types": {
+      "joi": "17.13.9"
+    },
+    "@docusaurus/utils-validation": {
+      "joi": "17.13.9"
+    },
     "serve-handler": {
       "minimatch": "11.0.1"
+    },
+    "@svgr/webpack": {
+      "@svgr/plugin-svgo": "$@microsoft/flipcard-svgr-plugin-svgo"
     },
     "uuid": "^14.0.0",
     "serialize-javascript": "^7.1.4",
