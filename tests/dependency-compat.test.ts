@@ -17,7 +17,7 @@ describe('scoped patched dependency compatibility', () => {
     ['card.ts', '!*.js', {}, true],
     ['card.js', '!*.js', {}, false],
     ['src/card.ts', 'src/@(card|tile).ts', {}, true],
-    ['C:\\cards\\tile.ts', 'C:\\cards\\*.ts', { windowsPathsNoEscape: true }, true],
+    ['C:/cards/tile.ts', 'C:\\cards\\*.ts', { windowsPathsNoEscape: true }, true],
   ])('matches %s using %s', (path, pattern, options, expected) => {
     expect(match(path, pattern, options)).toBe(expected);
     expect(new match.Minimatch(pattern, options).match(path)).toBe(expected);
