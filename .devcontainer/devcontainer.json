@@ -1,6 +1,8 @@
 {
   "name": "Flipcard",
-  "image": "mcr.microsoft.com/devcontainers/typescript-node:5.2.5-24-bookworm",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
   "postCreateCommand": "npm ci && npm run build:libs && npm --prefix docs ci && npm --prefix adaptive-slide ci",
   "forwardPorts": [5173, 3000, 3001],
   "portsAttributes": {
