@@ -5,49 +5,54 @@ title: '@microsoft/flipcard (vanilla)'
 
 # `@microsoft/flipcard`
 
-Framework‑neutral renderer. Registers a `<flip-card>` Web Component you can drop into any HTML page, plus a curated **asset library** of sample manifests and helpers for server‑side or non‑React rendering.
+Framework-neutral DOM renderer and curated **asset library**. The public
+`createFlipCardElement(asset, options)` function returns an `HTMLButtonElement`.
+It needs a browser DOM; it is not a server-side renderer or a registered
+`<flip-card>` custom element.
 
 ## Install
 
-```bash
-npm install @microsoft/flipcard @microsoft/flipcard-core @microsoft/flipcard-themes
+Follow [local-source setup](../getting-started.md): `npm ci` then `npm run build`
+at the repository root. Do not assume a published npm package.
+
+## Create the element
+
+```ts
+import { createFlipCardElement, flipCardAssetLibrary } from '@microsoft/flipcard';
+import '@microsoft/flipcard/styles.css';
+import '@microsoft/flipcard-themes/base.css';
+import '@microsoft/flipcard-themes/light.css';
+import '@microsoft/flipcard-themes/dark.css';
+import '@microsoft/flipcard-themes/midnight-sapphire.css';
+
+const asset = flipCardAssetLibrary[0];
+if (asset) {
+  const card = createFlipCardElement(asset, {
+    defaultState: 'front',
+    interactive: true,
+  });
+  card.addEventListener('click', () => console.log(card.dataset.state));
+  document.body.append(card);
+}
 ```
 
-## Define the element
+### Inputs and state
 
-```html
-<link rel="stylesheet" href="/path/to/@microsoft/flipcard-themes/styles/light.css" />
-<script type="module">
-  import { defineFlipCard } from '@microsoft/flipcard';
-  defineFlipCard();
-</script>
-
-<flip-card
-  front-title="Hello FlipCard"
-  back-title="Welcome"
-  flip-hint="Click to flip"
-  show-flip-hint
-></flip-card>
-```
-
-### Attributes
-
-| Attribute | Description |
+| Input | Description |
 |---|---|
-| `front-title` | Title shown on the front face. |
-| `back-title` | Title shown on the back face. |
-| `flip-hint` | Optional hint text rendered as an affordance. |
-| `default-flipped` | If present, the card starts on the back face. |
-| `show-flip-hint` | Toggle the visible flip affordance. |
-| `schema` | JSON string for the back‑face structured payload. |
-| `manifest` | JSON string for a full `FlipCardManifest`. |
+| `asset` | Required `FlipCardAssetEntry`, including `manifest.design`, `manifest.schema`, and `manifest.metadata`. |
+| `options.defaultState` | `'front'` (default) or `'back'`. |
+| `options.interactive` | Defaults to `true`; `false` disables the button. |
+
+The button exposes its current face through `data-state` and `aria-pressed`.
+The back serializes the whole manifest. There are no manifest/schema properties,
+custom attributes, `defineFlipCard` function, or `/auto` export.
 
 ### Events
 
-| Event | Detail | Fired when |
-|---|---|---|
-| `flipcard:flip` | `{ flipped: boolean }` | The card flips (front ↔ back). |
-| `flipcard:copy` | `{ text: string }` | A "copy schema" action is invoked. |
+Use the native `click` event. The internal listener flips first, so a listener
+attached after creation can read `card.dataset.state`. The renderer does not
+dispatch `flipcard:flip` or `flipcard:copy` custom events.
 
 ## Asset library
 
@@ -62,23 +67,25 @@ import {
   groupFlipCardAssetsByCategory,
 } from '@microsoft/flipcard';
 
-const tealCards = getFlipCardAssetsByCategory('teal');
+const statusCards = getFlipCardAssetsByCategory('status');
 const grouped = groupFlipCardAssetsByCategory();
 ```
 
 Useful for showcase pages, the FlipDeck gallery, and auto‑generated catalog grids.
 
-## Render helpers (server / non‑custom‑element)
+## Render helpers
 
 ```ts
-import { createFlipCardElement, getThemeClassName, serializeManifest } from '@microsoft/flipcard';
-
-const el = createFlipCardElement({ /* options */ });
-document.body.appendChild(el);
+import { flipCardAssetLibrary, getThemeClassName, serializeManifest } from '@microsoft/flipcard';
 
 const className = getThemeClassName('midnight-sapphire');
-const json = serializeManifest({ id: 'demo', title: 'Hello' });
+const asset = flipCardAssetLibrary[0];
+const json = asset ? serializeManifest(asset.manifest) : undefined;
 ```
+
+`getThemeClassName` and `serializeManifest` do not require a DOM.
+`createFlipCardElement` does. The asset-only entry point
+`@microsoft/flipcard/assets` is also exported.
 
 ## See also
 

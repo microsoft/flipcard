@@ -9,9 +9,8 @@ Shared design tokens for every FlipCard renderer. Ships TypeScript token objects
 
 ## Install
 
-```bash
-npm install @microsoft/flipcard-themes
-```
+Build the [local source](../getting-started.md) with `npm ci` and `npm run build`
+at the repository root; the workspace resolves this package.
 
 ## Tokens
 
@@ -23,7 +22,10 @@ darkTokens.surface;             // '#15181d'
 midnightSapphireTokens.bg;      // '#060a18'
 ```
 
-Each token set is the same shape — typed as `FlipCardTokens` — so you can swap themes by reference.
+The token objects have matching keys. The exported `FlipCardTokens` type is
+currently `typeof lightTokens`, including its literal values; it is not a
+widened type accepting every theme or custom palette. Derive a widened type
+such as `{ [K in keyof typeof lightTokens]: string }` when needed.
 
 | Token | Purpose |
 |---|---|
@@ -46,15 +48,23 @@ Each token set is the same shape — typed as `FlipCardTokens` — so you can sw
 
 ## CSS
 
-The package ships matching CSS files under `styles/` that map every token to a CSS custom property the renderers read. Import the one you want:
+Use the public CSS subpaths below, not `/styles/light.css` or a `/tokens` import.
+Load structural and asset styling alongside the desired themes:
 
 ```ts
-import '@microsoft/flipcard-themes/styles/light.css';
-import '@microsoft/flipcard-themes/styles/dark.css';
-import '@microsoft/flipcard-themes/styles/midnight-sapphire.css';
+import '@microsoft/flipcard/styles.css';
+import '@microsoft/flipcard-themes/base.css';
+import '@microsoft/flipcard-themes/light.css';
+import '@microsoft/flipcard-themes/dark.css';
+import '@microsoft/flipcard-themes/midnight-sapphire.css';
 ```
 
-Or scope a theme to a subtree by setting the appropriate class on a wrapper element — see the `getThemeClassName` helper in **[`@microsoft/flipcard` (vanilla)](./vanilla)**.
+The classes are `fc-theme-light`, `fc-theme-dark`, and
+`fc-theme-midnight-sapphire`. Asset renderers set a class on each card from
+`asset.theme`, so changing an ancestor does not override an explicitly themed
+card. `light.css` also styles `:root`; `dark.css` supplies an automatic dark-mode
+root unless the root has `fc-theme-light`. See `getThemeClassName` in
+**[`@microsoft/flipcard` (vanilla)](./vanilla.md)**.
 
 ## Customising
 
