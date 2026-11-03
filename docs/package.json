@@ -60,7 +60,7 @@
       "minimatch": "11.0.1"
     },
     "@svgr/webpack": {
-      "@svgr/plugin-svgo": "$@microsoft/flipcard-svgr-plugin-svgo"
+      "@svgr/plugin-svgo": "file:../../../../tools/svgr-plugin-svgo"
     },
     "uuid": "^14.0.0",
     "serialize-javascript": "^7.1.4",
